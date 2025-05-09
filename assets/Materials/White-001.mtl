@@ -37,7 +37,7 @@
         "b": 77,
         "a": 255
       },
-      "occlusion": 0,
+      "occlusion": 1,
       "roughness": 0.881,
       "metallic": 0.851,
       "SpecularIntensity": 0.381,
