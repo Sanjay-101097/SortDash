@@ -32,20 +32,20 @@
     {
       "mainColor": {
         "__type__": "cc.Color",
-        "r": 81,
-        "g": 243,
-        "b": 113,
+        "r": 77,
+        "g": 77,
+        "b": 77,
         "a": 255
       },
-      "occlusion": 0.078,
-      "roughness": 0.014,
-      "metallic": 0.143,
-      "SpecularIntensity": 0.34,
+      "occlusion": 0,
+      "roughness": 0.881,
+      "metallic": 0.851,
+      "SpecularIntensity": 0.381,
       "emissive": {
         "__type__": "cc.Color",
-        "r": 2,
-        "g": 116,
-        "b": 38,
+        "r": 88,
+        "g": 88,
+        "b": 88,
         "a": 255
       }
     },
