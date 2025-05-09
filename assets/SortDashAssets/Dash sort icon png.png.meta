@@ -2,7 +2,7 @@
   "ver": "1.0.22",
   "importer": "image",
   "imported": true,
-  "uuid": "95070ee3-4f56-4c3b-90cc-8d450b08177d",
+  "uuid": "f5137c3b-f2fb-4772-a685-e5c4d7a44afa",
   "files": [
     ".png",
     ".json"
@@ -10,8 +10,8 @@
   "subMetas": {
     "6c48a": {
       "importer": "texture",
-      "uuid": "95070ee3-4f56-4c3b-90cc-8d450b08177d@6c48a",
-      "displayName": "Rectangle 1240",
+      "uuid": "f5137c3b-f2fb-4772-a685-e5c4d7a44afa@6c48a",
+      "displayName": "Dash sort icon png",
       "id": "6c48a",
       "name": "texture",
       "userData": {
@@ -22,7 +22,7 @@
         "mipfilter": "none",
         "anisotropy": 0,
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "95070ee3-4f56-4c3b-90cc-8d450b08177d"
+        "imageUuidOrDatabaseUri": "f5137c3b-f2fb-4772-a685-e5c4d7a44afa"
       },
       "ver": "1.0.21",
       "imported": true,
@@ -33,8 +33,8 @@
     },
     "f9941": {
       "importer": "sprite-frame",
-      "uuid": "95070ee3-4f56-4c3b-90cc-8d450b08177d@f9941",
-      "displayName": "Rectangle 1240",
+      "uuid": "f5137c3b-f2fb-4772-a685-e5c4d7a44afa@f9941",
+      "displayName": "Dash sort icon png",
       "id": "f9941",
       "name": "spriteFrame",
       "userData": {
@@ -45,17 +45,17 @@
         "offsetY": 0,
         "trimX": 0,
         "trimY": 0,
-        "width": 2048,
-        "height": 2048,
-        "rawWidth": 2048,
-        "rawHeight": 2048,
+        "width": 416,
+        "height": 421,
+        "rawWidth": 416,
+        "rawHeight": 421,
         "borderTop": 0,
         "borderBottom": 0,
         "borderLeft": 0,
         "borderRight": 0,
         "packable": true,
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "95070ee3-4f56-4c3b-90cc-8d450b08177d@6c48a",
+        "imageUuidOrDatabaseUri": "f5137c3b-f2fb-4772-a685-e5c4d7a44afa@6c48a",
         "atlasUuid": ""
       },
       "ver": "1.0.9",
@@ -69,6 +69,6 @@
   "userData": {
     "hasAlpha": true,
     "type": "sprite-frame",
-    "redirect": "95070ee3-4f56-4c3b-90cc-8d450b08177d@f9941"
+    "redirect": "f5137c3b-f2fb-4772-a685-e5c4d7a44afa@f9941"
   }
 }

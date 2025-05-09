@@ -32,9 +32,9 @@
     {
       "mainColor": {
         "__type__": "cc.Color",
-        "r": 81,
-        "g": 243,
-        "b": 113,
+        "r": 66,
+        "g": 190,
+        "b": 91,
         "a": 255
       },
       "occlusion": 0.078,
@@ -43,9 +43,9 @@
       "SpecularIntensity": 0.34,
       "emissive": {
         "__type__": "cc.Color",
-        "r": 2,
-        "g": 116,
-        "b": 38,
+        "r": 8,
+        "g": 85,
+        "b": 32,
         "a": 255
       }
     },

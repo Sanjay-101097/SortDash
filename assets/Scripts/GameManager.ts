@@ -1,5 +1,5 @@
 
-import { _decorator, BlockInputEvents, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, tween, Vec3 } from 'cc';
+import { _decorator, BlockInputEvents, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, sys, Tween, tween, TweenAction, TweenSystem, v3, Vec3 } from 'cc';
 import { TileCreation } from './TileCreation';
 import { Box } from './Box';
 const { ccclass, property } = _decorator;
@@ -27,7 +27,7 @@ export class GameManager extends Component {
     Bolock: Node = null;
 
     @property(Node)
-    Bus: Node = null;
+    Canvas: Node = null;
 
     @property(Node)
     BusArr: Node[] = []
@@ -55,6 +55,19 @@ export class GameManager extends Component {
     buscolor: string[] = ["0", "3", "4", "2", "1"];
     currentBusidx = 0;
 
+    protected start(): void {
+        let nodeToAnimate = this.Canvas.getChildByName("Label");
+        const zoomIn = tween(nodeToAnimate)
+            .to(0.5, { scale: v3(1.2, 1.2, 1.2) });
+        const zoomOut = tween(nodeToAnimate)
+            .to(0.5, { scale: v3(0.8, 0.8, 0.8) });
+        tween(nodeToAnimate)
+            .sequence(zoomIn, zoomOut)
+            .union()
+            .repeatForever()
+            .start();
+    }
+
 
     onEnable() {
         input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
@@ -76,8 +89,7 @@ export class GameManager extends Component {
 
     onTouchStart(event) {
         // this.anim();
-        // this.handnode.active = false;
-        // this.Canvas.active = false;
+        Tween.stopAll();
         const mousePos = event.getLocation();
         this.StartingPoint.x = mousePos.x;
         this.StartingPoint.y = mousePos.y;
@@ -87,7 +99,7 @@ export class GameManager extends Component {
         const maxDistance = 1000; // Maximum ray distance
         const queryTrigger = true; // Include trigger colliders
 
-
+        this.Canvas.active = false;
         if (PhysicsSystem.instance.raycastClosest(ray, mask, maxDistance, queryTrigger)) {
 
             const result = PhysicsSystem.instance.raycastClosestResult;
@@ -144,7 +156,7 @@ export class GameManager extends Component {
                         this.Cidx += 1;
                     }
 
-                    if (this.Bidx == 9) {
+                    if (this.Bidx > 9) {
                         this.Bidx = 0;
                         let Fbus = this.BusArr[this.currentBusidx]
                         let Lbus
@@ -156,24 +168,25 @@ export class GameManager extends Component {
                         
                         this.scheduleOnce(() => {
                             tween(this.BusArr[this.currentBusidx])
-                                .to(0.3, { position: new Vec3(-0.157, 5.597, -11.644) }, { easing: 'sineIn' })
+                                .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
                                 .call(() => {
                                     this.currentBusidx += 1;
                                     if (this.currentBusidx == 3) {
                                         this.currentBusidx = 0
                                     }
                                     tween(this.BusArr[this.currentBusidx])
-                                        .to(0.3, { position: new Vec3(5.856, 5.597, -5.631) }, { easing: 'sineIn' }).call(() => {
+                                        .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' }).call(() => {
                                             this.Bidx = 0;
                                             this.CheckCollector();
-                                            Fbus.setPosition(11.491, 5.597, 0.004);
+                                            this.enable =true;
+                                            Fbus.setPosition(10.021, 4.751, 1.474);
                                             Fbus.children?.forEach((child) => {
                                                 child.destroy();
                                             })
 
                                         }).start()
                                     tween(this.BusArr[Lbus])
-                                        .to(0.3, { position: new Vec3(8.55, 5.597, -2.937) }, { easing: 'sineIn' }).start()
+                                        .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' }).start()
 
                                 }).start();
                         }, 1.5)
@@ -210,14 +223,12 @@ export class GameManager extends Component {
     CheckCollector() {
         if (this.collectorArr.length > 0) {
             if (this.collectorArr[this.collectorArr.length - 1].name == this.buscolor[this.currentBusidx]) {
-                // input.off(Input.EventType.TOUCH_START, this.onTouchStart, this);
-                // input.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-                // input.off(Input.EventType.TOUCH_END, this.onTouchEnd, this);
                 this.scheduleOnce(() => {
                     let tile = this.collectorArr.pop().getComponent(Box);
                     tile.isBus = true;
                     tile.fromcollector = true;
-                    tile.getComponent(Box).anim(this.Bidx, this.BusArr[this.currentBusidx]);
+                    tile.frequency = 0.5
+                    tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
 
                     this.Bidx += 1;
                     this.Cidx -= 1;
@@ -233,22 +244,24 @@ export class GameManager extends Component {
                         }
                         this.scheduleOnce(() => {
                             tween(this.BusArr[this.currentBusidx])
-                                .to(0.3, { position: new Vec3(-0.157, 5.597, -11.644) }, { easing: 'sineIn' })
+                                .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
                                 .call(() => {
                                     this.currentBusidx += 1;
                                     if (this.currentBusidx == 3) {
                                         this.currentBusidx = 0
                                     }
                                     tween(this.BusArr[this.currentBusidx])
-                                        .to(0.3, { position: new Vec3(5.856, 5.597, -5.631) }, { easing: 'sineIn' }).call(() => {
+                                        .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' }).call(() => {
+                                            this.Bidx = 0;
                                             this.CheckCollector();
-                                            Fbus.setPosition(11.491, 5.597, 0.004);
+                                            Fbus.setPosition(10.021, 4.751, 1.474);
                                             Fbus.children?.forEach((child) => {
                                                 child.destroy();
                                             })
+
                                         }).start()
                                     tween(this.BusArr[Lbus])
-                                        .to(0.3, { position: new Vec3(8.55, 5.597, -2.937) }, { easing: 'sineIn' }).start()
+                                        .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' }).start()
 
                                 }).start();
                         }, 1.5)
@@ -300,9 +313,36 @@ export class GameManager extends Component {
         return rotation;
     }
 
-    // update (deltaTime: number) {
-    //     // [4]
-    // }
+    OnStartButtonClick() {
+        
+        if (sys.os === sys.OS.ANDROID ) {
+            window.open("https://play.google.com/store/apps/details?id=com.Machina.SortDash&hl=en_IN&pli=1", "SortDash");
+        } else if (sys.os === sys.OS.IOS) {
+            window.open("https://apps.apple.com/us/app/sort-dash-color-match/id6737854991", "SortDash");
+        }else{
+            window.open("https://play.google.com/store/apps/details?id=com.Machina.SortDash&hl=en_IN&pli=1", "SortDash");
+        }
+        
+      }
+
+      private enable = false;
+      private dt = 0;
+
+      update(deltaTime: number) {
+        if(this.enable){
+            this.dt += deltaTime;
+            if(this.dt>=30){
+                this.Canvas.active = true;
+                this.Canvas.children[1].active = false;
+                this.Canvas.children[2].active = true;
+                this.Canvas.children[3].active = true;
+                this.Canvas.children[4].active = true;
+                this.Canvas.getChildByName("Label").active = false;
+            }
+        }
+
+
+      }
 }
 
 /**
