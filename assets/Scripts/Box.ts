@@ -31,10 +31,13 @@ export class Box extends Component {
     public amplitude: number = 3;
 
     public frequency: number = 1;
-    busarray: Vec3[] = [new Vec3(6.48179, 6.247, -5.00521), new Vec3(6.343904, 6.247, -5.143096), new Vec3(6.206018, 6.247, -5.280982), new Vec3(6.068132, 6.247, -5.418868), new Vec3(5.930246, 6.247, -5.556754), new Vec3(5.79236, 6.247, -5.69464), new Vec3(5.65801, 6.247, -5.82899), new Vec3(5.516589, 6.247, -5.970411), new Vec3(5.382238, 6.247, -6.104762), new Vec3(5.247888, 6.247, -6.239112)]
+    busarray: Vec3[] = [new Vec3(4.838431, 5.352991, -3.361852), new Vec3(4.700545, 5.352991, -3.499738), new Vec3(4.562659, 5.352991, -3.637624), new Vec3(4.424774, 5.352991, -3.77551), new Vec3(4.286888, 5.352991, -3.913395), new Vec3(4.149002, 5.352991, -4.051281), new Vec3(4.014652, 5.352991, -4.185632), new Vec3(3.87323, 5.352991, -4.327053), new Vec3(3.73888, 5.352991, -4.461403), new Vec3(3.60453, 5.352991, -4.595753)]
 
-    collector: Vec3[] = [new Vec3(4.430949, 4.628, -2.251051), new Vec3(4.289528, 4.628, -2.392472), new Vec3(4.148107, 4.628, -2.533893), new Vec3(4.006685, 4.628, -2.675315), new Vec3(3.865264, 4.628, -2.816736), new Vec3(3.723843, 4.628, -2.958157), new Vec3(3.582421, 4.628, -3.099579), new Vec3(3.441, 4.628, -3.241), new Vec3(3.299579, 4.628, -3.382421), new Vec3(3.158157, 4.628, -3.523843), new Vec3(3.016736, 4.628, -3.665264), new Vec3(2.875315, 4.628, -3.806685), new Vec3(2.733893, 4.628, -3.948107), new Vec3(2.592472, 4.628, -4.089528), new Vec3(2.451051, 4.628, -4.230949)]
+    collector: Vec3[] = [new Vec3(7.233585, 6.305913, -5.053686), new Vec3(7.092164, 6.305913, -5.195108), new Vec3(6.950743, 6.305913, -5.336529), new Vec3(6.809321, 6.305913, -5.47795), new Vec3(6.6679, 6.305913, -5.619372), new Vec3(6.526392, 6.305913, -5.760781), new Vec3(6.384995, 6.305913, -5.902227), new Vec3(6.243599, 6.305913, -6.043673), new Vec3(6.102202, 6.305913, -6.185119), new Vec3(5.960805, 6.305913, -6.326565), new Vec3(5.819409, 6.305913, -6.468011), new Vec3(5.678012, 6.305913, -6.609457), new Vec3(5.536615, 6.305913, -6.750903), new Vec3(5.395219, 6.305913, -6.892349), new Vec3(5.253822, 6.305913, -7.033795)]
 
+    collectorRotation: Vec3 = new Vec3(90, -135.01, 67.841);
+
+    BusRotation: Vec3 = new Vec3(22.159, -45, 0);
     private timeElapsed: number = 0;
 
     private direction: Vec3 = new Vec3();
@@ -59,7 +62,7 @@ export class Box extends Component {
             this.endPosition = this.busarray[idx];
             this.amplitude = 5;
             this.frequency = 0.5
-            this.dir = -1;
+            this.dir = 1;
             this.duration = 0.5
 
         } else {
@@ -69,6 +72,7 @@ export class Box extends Component {
                 this.endPosition = this.collector[idx];
             } else {
                 this.endPosition = this.busarray[idx];
+            
             }
 
         }
@@ -167,7 +171,14 @@ export class Box extends Component {
             this.node.setScale(scale, scale, scale)
 
         }
-        const targetRotation = new Vec3(0, -45, 90);
+        let targetRotation;
+        if (!this.isBus) {
+            targetRotation = this.collectorRotation
+        }else{
+            targetRotation = this.BusRotation
+        }
+        
+        //  new Vec3(0, -45, 90);
         if (this.rotationElapsed < this.rotationDuration && this.timeElapsed > 0.7) {
             this.rotationElapsed += deltaTime;
             let rt = this.rotationElapsed / this.rotationDuration;
