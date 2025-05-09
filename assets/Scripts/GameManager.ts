@@ -208,19 +208,17 @@ export class GameManager extends Component {
 
                                 }).start();
                         }, 1.5)
-                    } else {
-                        this.scheduleOnce(() => {
-                            input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
-                            input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-                            input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
-                        }, 1.7)
                     }
 
 
 
 
                 }, 0.1, 4)
-
+                this.scheduleOnce(() => {
+                    input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
+                    input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+                    input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
+                }, 2)
             }
 
             this.SelectedNode = null;
@@ -305,80 +303,96 @@ export class GameManager extends Component {
     CheckCollector() {
         if (this.collectorArr.length >= 5) {
             const matchColor = this.buscolor[this.currentBusidx];
+            const matchedIndices = [];
+    
+            // Step 1: Find all matching 5-block groups
             for (let i = 0; i <= this.collectorArr.length - 5; i += 5) {
                 const node = this.collectorArr[i];
                 if (node.name === matchColor) {
-                    // Found match at every 5th index
-                    const movingTiles = this.collectorArr.splice(i, 5);
-    
-                    this.scheduleOnce(() => {
-                        movingTiles.forEach((tileNode, index) => {
-                            this.scheduleOnce(() => {
-                                const tile = tileNode.getComponent(Box);
-                                tile.isBus = true;
-                                tile.fromcollector = true;
-                                tile.frequency = 0.5;
-                                tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
-                                this.Bidx += 1;
-                                this.Cidx -= 1;
-                            }, index * 0.05);
-                        });
-                    
-                        const totalDelay = movingTiles.length * 0.2 + 0.2;
-                    
-                        this.scheduleOnce(() => {
-                            if (this.Bidx >= 10) {
-                                this.Bidx = 0;
-                                const Fbus = this.BusArr[this.currentBusidx];
-                                let Lbus;
-                                if (this.currentBusidx === 1) {
-                                    Lbus = 0;
-                                } else if (this.currentBusidx === 2) {
-                                    Lbus = 1;
-                                } else {
-                                    Lbus = this.currentBusidx + 2;
-                                }
-                    
-                                tween(Fbus)
-                                    .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
-                                    .call(() => {
-                                        this.currentBusidx = (this.currentBusidx + 1) % 3;
-                                        const newBus = this.BusArr[this.currentBusidx];
-                                        tween(newBus)
-                                            .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' })
-                                            .call(() => {
-                                                this.Bidx = 0;
-                                                this.CheckCollector();
-                                                Fbus.setPosition(10.021, 4.751, 1.474);
-                                                Fbus.children?.forEach(child => child.destroy());
-                                            })
-                                            .start();
-                    
-                                        tween(this.BusArr[Lbus])
-                                            .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' })
-                                            .start();
-                                    })
-                                    .start();
-                            } else {
-                                this.CheckCollector();
-                            }
-                        }, totalDelay);
-                    }, 0.1);
-                    
-    
-                    return; // Only one match should trigger action
+                    matchedIndices.push(i);
                 }
             }
-        }
     
-        // No match found
-        this.scheduleOnce(() => {
-            this.enableTouchMove = true;
-            input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
-            input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-            input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
-        }, 1.7);
+            if (matchedIndices.length > 0) {
+                let globalDelay = 0;
+                let totalRemoved = 0;
+    
+                matchedIndices.forEach((startIdx, batchIdx) => {
+                    const actualIdx = startIdx - totalRemoved; // adjust after splice
+                    const movingTiles = this.collectorArr.splice(actualIdx, 5); // remove 5 tiles
+    
+                    movingTiles.forEach((tileNode, localIdx) => {
+                        this.scheduleOnce(() => {
+                            const tile = tileNode.getComponent(Box);
+                            tile.isBus = true;
+                            tile.fromcollector = true;
+                            tile.frequency = 0.5;
+                            tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
+                            this.Bidx += 1;
+                            this.Cidx -= 1;
+                        }, globalDelay + localIdx * 0.05);
+                    });
+    
+                    globalDelay += movingTiles.length * 0.05;
+                    totalRemoved += 5;
+                });
+    
+                // After all animations finish
+                this.scheduleOnce(() => {
+                    if (this.Bidx >= 10) {
+                        this.Bidx = 0;
+                        const Fbus = this.BusArr[this.currentBusidx];
+                        let Lbus;
+                        if (this.currentBusidx === 1) {
+                            Lbus = 0;
+                        } else if (this.currentBusidx === 2) {
+                            Lbus = 1;
+                        } else {
+                            Lbus = this.currentBusidx + 2;
+                        }
+    
+                        tween(Fbus)
+                            .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
+                            .call(() => {
+                                this.currentBusidx = (this.currentBusidx + 1) % 3;
+                                const newBus = this.BusArr[this.currentBusidx];
+                                tween(newBus)
+                                    .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' })
+                                    .call(() => {
+                                        this.Bidx = 0;
+                                        this.CheckCollector();
+                                        Fbus.setPosition(10.021, 4.751, 1.474);
+                                        Fbus.children?.forEach(child => child.destroy());
+                                    })
+                                    .start();
+    
+                                tween(this.BusArr[Lbus])
+                                    .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' })
+                                    .start();
+                            })
+                            .start();
+                    } else {
+                        this.CheckCollector();
+                    }
+                }, globalDelay + 0.2);
+            } else {
+                // No match, reset all tiles
+                for (let i = 0; i < this.collectorArr.length; i++) {
+                    const tile = this.collectorArr[i].getComponent(Box);
+                    tile.reset(i);
+                }
+    
+                // Optional: re-enable touch if needed
+                // this.scheduleOnce(() => {
+                //     this.enableTouchMove = true;
+                //     input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
+                //     input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+                //     input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
+                // }, 1.7);
+            }
+        }
     }
+    
     
 
     private worldPositions;
@@ -466,7 +480,7 @@ export class GameManager extends Component {
       update(deltaTime: number) {
         if(this.enable){
             this.dt += deltaTime;
-            if(this.dt>=30){
+            if(this.dt>=25){
                 this.Canvas.active = true;
                 this.Canvas.children[1].active = false;
                 this.Canvas.children[2].active = true;

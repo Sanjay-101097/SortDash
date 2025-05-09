@@ -46,7 +46,13 @@ export class Box extends Component {
     idx;
     public isBus: boolean = false;
     Bus
-    fromcollector: boolean = false;;
+    fromcollector: boolean = false;
+
+    reset(idx){
+        tween(this.node)
+        .to(0.05, { position: this.collector[idx] }, { easing: 'sineIn' })
+        .start();
+    }
 
     anim(idx, node) {
 
