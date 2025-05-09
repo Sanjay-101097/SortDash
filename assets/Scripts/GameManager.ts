@@ -1,5 +1,5 @@
 
-import { _decorator, BlockInputEvents, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, sys, Tween, tween, TweenAction, TweenSystem, v3, Vec3 } from 'cc';
+import { _decorator, AudioClip, AudioSource, BlockInputEvents, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, sys, Tween, tween, TweenAction, TweenSystem, v3, Vec3 } from 'cc';
 import { TileCreation } from './TileCreation';
 import { Box } from './Box';
 const { ccclass, property } = _decorator;
@@ -38,11 +38,12 @@ export class GameManager extends Component {
     @property(Camera)
     camera: Camera = null;
 
-    @property(Material)
-    colorMaterials: Material[] = [];
+    @property(AudioClip)
+    Audioclips: AudioClip[] = [];
 
 
     private _ray: geometry.Ray = new geometry.Ray();
+    audioSource: AudioSource;
     public static score: number = 0;
     StartingPoint: Vec3 = new Vec3(0, 0, 0);
     SelectedNode: Node = null;
@@ -56,11 +57,12 @@ export class GameManager extends Component {
     currentBusidx = 0;
 
     protected start(): void {
+        this.audioSource = this.node.getComponent(AudioSource);
         let nodeToAnimate = this.Canvas.getChildByName("Label");
         const zoomIn = tween(nodeToAnimate)
-            .to(0.5, { scale: v3(1.2, 1.2, 1.2) });
+            .to(0.8, { scale: v3(1.1, 1.1, 1.1) });
         const zoomOut = tween(nodeToAnimate)
-            .to(0.5, { scale: v3(0.8, 0.8, 0.8) });
+            .to(0.8, { scale: v3(0.9, 0.9, 0.9) });
         tween(nodeToAnimate)
             .sequence(zoomIn, zoomOut)
             .union()
@@ -89,6 +91,8 @@ export class GameManager extends Component {
 
     onTouchStart(event) {
         // this.anim();
+        this.Collector.getComponent(AudioSource).play();
+        
         Tween.stopAll();
         const mousePos = event.getLocation();
         this.StartingPoint.x = mousePos.x;
@@ -108,13 +112,14 @@ export class GameManager extends Component {
 
 
             if (node.name === "Col") {
+                this.audioSource.playOneShot(this.Audioclips[0],1);
                 input.off(Input.EventType.TOUCH_START, this.onTouchStart, this);
                 input.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
                 input.off(Input.EventType.TOUCH_END, this.onTouchEnd, this);
 
                 this.schedule(() => {
                     let box = node.children[node.children.length - 1].addComponent(Box);
-
+                    this.audioSource.playOneShot(this.Audioclips[4],1);
                     // console.log("I'm here",this.SelectedNode.getWorldPosition());
 
                     if (node.getWorldPosition().x >= 0) {
@@ -160,13 +165,16 @@ export class GameManager extends Component {
                         this.Bidx = 0;
                         let Fbus = this.BusArr[this.currentBusidx]
                         let Lbus
-                        if((this.currentBusidx + 2) >2){
+                        if(this.currentBusidx ==1){
                             Lbus = 0
+                        }else if(this.currentBusidx ==2){
+                            Lbus = 1
                         }else{
                             Lbus = this.currentBusidx + 2
                         }
                         
                         this.scheduleOnce(() => {
+                            this.audioSource.playOneShot(this.Audioclips[1],1);
                             tween(this.BusArr[this.currentBusidx])
                                 .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
                                 .call(() => {
@@ -220,72 +228,159 @@ export class GameManager extends Component {
 
     }
 
+    // CheckCollector() {
+    //     if (this.collectorArr.length > 0) {
+    //         if (this.collectorArr[this.collectorArr.length - 1].name == this.buscolor[this.currentBusidx]) {
+    //             this.scheduleOnce(() => {
+    //                 let tile = this.collectorArr.pop().getComponent(Box);
+    //                 tile.isBus = true;
+    //                 tile.fromcollector = true;
+    //                 tile.frequency = 0.5
+    //                 tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
+
+    //                 this.Bidx += 1;
+    //                 this.Cidx -= 1;
+
+    //                 if (this.Bidx == 10) {
+    //                     this.Bidx = 0;
+    //                     let Fbus = this.BusArr[this.currentBusidx]
+    //                     let Lbus
+    //                     if(this.currentBusidx ==1){
+    //                         Lbus = 0
+    //                     }else if(this.currentBusidx ==2){
+    //                         Lbus = 1
+    //                     }else{
+    //                         Lbus = this.currentBusidx + 2
+    //                     }
+    //                     this.scheduleOnce(() => {
+    //                         tween(this.BusArr[this.currentBusidx])
+    //                             .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
+    //                             .call(() => {
+    //                                 this.currentBusidx += 1;
+    //                                 if (this.currentBusidx == 3) {
+    //                                     this.currentBusidx = 0
+    //                                 }
+    //                                 tween(this.BusArr[this.currentBusidx])
+    //                                     .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' }).call(() => {
+    //                                         this.Bidx = 0;
+    //                                         this.CheckCollector();
+    //                                         Fbus.setPosition(10.021, 4.751, 1.474);
+    //                                         Fbus.children?.forEach((child) => {
+    //                                             child.destroy();
+    //                                         })
+
+    //                                     }).start()
+    //                                 tween(this.BusArr[Lbus])
+    //                                     .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' }).start()
+
+    //                             }).start();
+    //                     }, 1.5)
+    //                 } else {
+    //                     this.CheckCollector();
+    //                 }
+
+    //             }, 0.1);
+    //         }
+
+    //     } else {
+    //         this.scheduleOnce(() => {
+    //             this.enableTouchMove = true;
+    //             input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
+    //             input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+    //             input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
+    //         }, 1.7)
+    //     }
+    // }
+
     CheckCollector() {
-        if (this.collectorArr.length > 0) {
-            if (this.collectorArr[this.collectorArr.length - 1].name == this.buscolor[this.currentBusidx]) {
-                this.scheduleOnce(() => {
-                    let tile = this.collectorArr.pop().getComponent(Box);
-                    tile.isBus = true;
-                    tile.fromcollector = true;
-                    tile.frequency = 0.5
-                    tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
-
-                    this.Bidx += 1;
-                    this.Cidx -= 1;
-
-                    if (this.Bidx == 10) {
-                        this.Bidx = 0;
-                        let Fbus = this.BusArr[this.currentBusidx]
-                        let Lbus
-                        if((this.currentBusidx + 2) >=2){
-                            Lbus = 0
-                        }else{
-                            Lbus = this.currentBusidx + 2
-                        }
+        if (this.collectorArr.length >= 5) {
+            const matchColor = this.buscolor[this.currentBusidx];
+            for (let i = 0; i <= this.collectorArr.length - 5; i += 5) {
+                const node = this.collectorArr[i];
+                if (node.name === matchColor) {
+                    // Found match at every 5th index
+                    const movingTiles = this.collectorArr.splice(i, 5);
+    
+                    this.scheduleOnce(() => {
+                        movingTiles.forEach((tileNode, index) => {
+                            this.scheduleOnce(() => {
+                                const tile = tileNode.getComponent(Box);
+                                tile.isBus = true;
+                                tile.fromcollector = true;
+                                tile.frequency = 0.5;
+                                tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
+                                this.Bidx += 1;
+                                this.Cidx -= 1;
+                            }, index * 0.05);
+                        });
+                    
+                        const totalDelay = movingTiles.length * 0.2 + 0.2;
+                    
                         this.scheduleOnce(() => {
-                            tween(this.BusArr[this.currentBusidx])
-                                .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
-                                .call(() => {
-                                    this.currentBusidx += 1;
-                                    if (this.currentBusidx == 3) {
-                                        this.currentBusidx = 0
-                                    }
-                                    tween(this.BusArr[this.currentBusidx])
-                                        .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' }).call(() => {
-                                            this.Bidx = 0;
-                                            this.CheckCollector();
-                                            Fbus.setPosition(10.021, 4.751, 1.474);
-                                            Fbus.children?.forEach((child) => {
-                                                child.destroy();
+                            if (this.Bidx >= 10) {
+                                this.Bidx = 0;
+                                const Fbus = this.BusArr[this.currentBusidx];
+                                let Lbus;
+                                if (this.currentBusidx === 1) {
+                                    Lbus = 0;
+                                } else if (this.currentBusidx === 2) {
+                                    Lbus = 1;
+                                } else {
+                                    Lbus = this.currentBusidx + 2;
+                                }
+                    
+                                tween(Fbus)
+                                    .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
+                                    .call(() => {
+                                        this.currentBusidx = (this.currentBusidx + 1) % 3;
+                                        const newBus = this.BusArr[this.currentBusidx];
+                                        tween(newBus)
+                                            .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' })
+                                            .call(() => {
+                                                this.Bidx = 0;
+                                                this.CheckCollector();
+                                                Fbus.setPosition(10.021, 4.751, 1.474);
+                                                Fbus.children?.forEach(child => child.destroy());
                                             })
-
-                                        }).start()
-                                    tween(this.BusArr[Lbus])
-                                        .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' }).start()
-
-                                }).start();
-                        }, 1.5)
-                    } else {
-                        this.CheckCollector();
-                    }
-
-                }, 0.1);
+                                            .start();
+                    
+                                        tween(this.BusArr[Lbus])
+                                            .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' })
+                                            .start();
+                                    })
+                                    .start();
+                            } else {
+                                this.CheckCollector();
+                            }
+                        }, totalDelay);
+                    }, 0.1);
+                    
+    
+                    return; // Only one match should trigger action
+                }
             }
-
-        } else {
-            this.scheduleOnce(() => {
-                this.enableTouchMove = true;
-                input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
-                input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-                input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
-            }, 1.7)
         }
+    
+        // No match found
+        this.scheduleOnce(() => {
+            this.enableTouchMove = true;
+            input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
+            input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+            input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
+        }, 1.7);
     }
+    
 
     private worldPositions;
-
+    sound:boolean = true;
 
     onTouchMove(event: EventTouch) {
+        if(this.sound == true){
+            this.audioSource.clip = this.Audioclips[3];
+            this.sound = false;
+            this.playAudioMultipleTimes();
+            
+        }
         const mousePos = event.getLocation();
         if (this.SelectedNode) {
             let angle = (mousePos.x - this.StartingPoint.x) / 2.5;
@@ -293,8 +388,37 @@ export class GameManager extends Component {
         }
 
     }
-    onTouchEnd(event) {
 
+    _playIndex: number = 0;
+    repeatCount: number = 10;
+    playDuration: number = 0.1;
+
+    playAudioMultipleTimes() {
+        if (!this.audioSource || !this.audioSource.clip) {
+            return;
+        }
+
+        const playOnce = () => {
+            if (this._playIndex >= this.repeatCount || this.sound){
+                this._playIndex = 0;
+                return;
+            } 
+
+            this.audioSource.play();
+
+            this.scheduleOnce(() => {
+                this.audioSource.stop();
+
+                this._playIndex++;
+                playOnce();
+            }, this.playDuration);
+        };
+
+        playOnce();
+    }
+
+    onTouchEnd(event) {
+        this.sound = true;
         if (this.SelectedNode === null || !this.enableTouchMove) return;
 
         const angle = this.InitialAngle;
