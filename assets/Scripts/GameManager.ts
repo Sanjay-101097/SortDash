@@ -2,6 +2,7 @@
 import { _decorator, BlockInputEvents, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, sys, Tween, tween, TweenAction, TweenSystem, v3, Vec3 } from 'cc';
 import { TileCreation } from './TileCreation';
 import { Box } from './Box';
+import {super_html_playable} from "db://assets/Scripts/super_html_playable";
 const { ccclass, property } = _decorator;
 
 /**
@@ -40,6 +41,8 @@ export class GameManager extends Component {
 
     @property(Material)
     colorMaterials: Material[] = [];
+    
+    super:super_html_playable = null;
 
 
     private _ray: geometry.Ray = new geometry.Ray();
@@ -55,6 +58,11 @@ export class GameManager extends Component {
     buscolor: string[] = ["0", "3", "4", "2", "1"];
     currentBusidx = 0;
 
+    public Downnload():void
+    {
+        this.super.download();
+    }
+    
     protected start(): void {
         let nodeToAnimate = this.Canvas.getChildByName("Label");
         const zoomIn = tween(nodeToAnimate)

@@ -1,5 +1,5 @@
 {
-  "ver": "2.3.1",
+  "ver": "2.3.13",
   "importer": "fbx",
   "imported": true,
   "uuid": "f968488d-2a4c-4e6a-9c79-b5e60083045d",
@@ -12,9 +12,10 @@
       "id": "71831",
       "name": "collector_Material0.mesh",
       "userData": {
-        "gltfIndex": 0
+        "gltfIndex": 0,
+        "triangleCount": 7200
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -63,7 +64,7 @@
       "userData": {
         "gltfIndex": 0
       },
-      "ver": "1.0.12",
+      "ver": "1.0.14",
       "imported": true,
       "files": [
         ".json"
@@ -74,7 +75,6 @@
   "userData": {
     "imageMetas": [],
     "legacyFbxImporter": false,
-    "redirect": "f968488d-2a4c-4e6a-9c79-b5e60083045d@40b4f",
     "assetFinder": {
       "meshes": [
         "f968488d-2a4c-4e6a-9c79-b5e60083045d@71831"
@@ -90,7 +90,26 @@
       ]
     },
     "fbx": {
-      "smartMaterialEnabled": false
+      "smartMaterialEnabled": false,
+      "matchMeshNames": false
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
     }
   }
 }
