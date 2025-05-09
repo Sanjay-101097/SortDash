@@ -2,7 +2,7 @@
 import { _decorator, AudioClip, AudioSource, BlockInputEvents, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, sys, Tween, tween, TweenAction, TweenSystem, v3, Vec3 } from 'cc';
 import { TileCreation } from './TileCreation';
 import { Box } from './Box';
-import {super_html_playable} from "db://assets/Scripts/super_html_playable";
+import { super_html_playable } from './super_html_playable';
 const { ccclass, property } = _decorator;
 
 /**
@@ -46,7 +46,7 @@ export class GameManager extends Component {
     Audioclips: AudioClip[] = [];
 
 
-    super:super_html_playable = null;
+    super_html_playable: super_html_playable = new super_html_playable();
     private _ray: geometry.Ray = new geometry.Ray();
     audioSource: AudioSource;
     public static score: number = 0;
@@ -456,8 +456,9 @@ export class GameManager extends Component {
         }else{
             window.open("https://play.google.com/store/apps/details?id=com.Machina.SortDash&hl=en_IN&pli=1", "SortDash");
         }
-        
-      }
+        this.super_html_playable.download();
+
+    }
 
       private enable = false;
       private dt = 0;
