@@ -60,6 +60,8 @@ export class GameManager extends Component {
     busArr: Node[] = [];
     buscolor: string[] = ["0", "3", "4", "2", "1"];
     currentBusidx = 0;
+
+    wrongCnt = 0;
     isAnimating: boolean;
 
     public Downnload():void
@@ -131,7 +133,7 @@ export class GameManager extends Component {
                 let sIdx = 0;
                 this.schedule(() => {
                     let box = node.children[node.children.length - 1].addComponent(Box);
-                    this.audioSource.playOneShot(this.Audioclips[4],1);
+                    
                     // console.log("I'm here",this.SelectedNode.getWorldPosition());
 
                     if (node.getWorldPosition().x >= 0) {
@@ -166,11 +168,15 @@ export class GameManager extends Component {
                         box.anim(this.Bidx, this.BusArr[this.currentBusidx]);
                         this.busArr.push(box.node)
                         this.Bidx += 1;
+                        this.audioSource.playOneShot(this.Audioclips[4],1);
                     } else if (this.Cidx <= 14) {
                         box.isBus = false;
                         box.anim(this.Cidx, this.Collector);
                         this.collectorArr.push(box.node)
                         this.Cidx += 1;
+                        this.audioSource.playOneShot(this.Audioclips[4],1);
+                    }else{
+                        this.wrongCnt +=1
                     }
 
                     if (this.Bidx > 9) {
@@ -430,7 +436,7 @@ export class GameManager extends Component {
       update(deltaTime: number) {
         if(this.enable){
             this.dt += deltaTime;
-            if(this.dt>=25){
+            if(this.dt>=25 || this.wrongCnt>=15){
                 this.Canvas.active = true;
                 this.Canvas.children[1].active = false;
                 this.Canvas.children[2].active = true;
