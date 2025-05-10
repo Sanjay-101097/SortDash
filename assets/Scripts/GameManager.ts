@@ -60,6 +60,7 @@ export class GameManager extends Component {
     busArr: Node[] = [];
     buscolor: string[] = ["0", "3", "4", "2", "1"];
     currentBusidx = 0;
+    isAnimating: boolean;
 
     public Downnload():void
     {
@@ -99,8 +100,12 @@ export class GameManager extends Component {
     private Bidx = 0;
     private Cidx = 0;
 
+    collectoranim: boolean = false;
+
     onTouchStart(event) {
         // this.anim();
+        if (this.isAnimating) return; // Block touch during animations
+        this.isAnimating = true;
         this.Collector.getComponent(AudioSource).play();
         
         Tween.stopAll();
@@ -123,10 +128,7 @@ export class GameManager extends Component {
 
             if (node.name === "Col") {
                 this.audioSource.playOneShot(this.Audioclips[0],1);
-                input.off(Input.EventType.TOUCH_START, this.onTouchStart, this);
-                input.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-                input.off(Input.EventType.TOUCH_END, this.onTouchEnd, this);
-
+                let sIdx = 0;
                 this.schedule(() => {
                     let box = node.children[node.children.length - 1].addComponent(Box);
                     this.audioSource.playOneShot(this.Audioclips[4],1);
@@ -182,7 +184,8 @@ export class GameManager extends Component {
                         }else{
                             Lbus = this.currentBusidx + 2
                         }
-                        
+                        this.isAnimating = true;
+                        this.collectoranim = true; 
                         this.scheduleOnce(() => {
                             this.audioSource.playOneShot(this.Audioclips[1],1);
                             tween(this.BusArr[this.currentBusidx])
@@ -208,19 +211,19 @@ export class GameManager extends Component {
 
                                 }).start();
                         }, 1.5)
-                    } else {
-                        this.scheduleOnce(() => {
-                            input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
-                            input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-                            input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
-                        }, 1.7)
                     }
 
+                    sIdx+=1;
 
-
+                    
 
                 }, 0.1, 4)
-
+                this.scheduleOnce(()=>{
+                    if(!this.collectoranim)
+                        this.isAnimating = false; 
+                },0.6)
+               
+                 
             }
 
             this.SelectedNode = null;
@@ -228,7 +231,7 @@ export class GameManager extends Component {
 
         } else {
             // No object was hit
-
+            this.isAnimating = false; 
             this.SelectedNode = this.Bolock;
             this.InitialAngle = this.Bolock.eulerAngles.y;
 
@@ -238,153 +241,112 @@ export class GameManager extends Component {
 
     }
 
-    // CheckCollector() {
-    //     if (this.collectorArr.length > 0) {
-    //         if (this.collectorArr[this.collectorArr.length - 1].name == this.buscolor[this.currentBusidx]) {
-    //             this.scheduleOnce(() => {
-    //                 let tile = this.collectorArr.pop().getComponent(Box);
-    //                 tile.isBus = true;
-    //                 tile.fromcollector = true;
-    //                 tile.frequency = 0.5
-    //                 tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
 
-    //                 this.Bidx += 1;
-    //                 this.Cidx -= 1;
-
-    //                 if (this.Bidx == 10) {
-    //                     this.Bidx = 0;
-    //                     let Fbus = this.BusArr[this.currentBusidx]
-    //                     let Lbus
-    //                     if(this.currentBusidx ==1){
-    //                         Lbus = 0
-    //                     }else if(this.currentBusidx ==2){
-    //                         Lbus = 1
-    //                     }else{
-    //                         Lbus = this.currentBusidx + 2
-    //                     }
-    //                     this.scheduleOnce(() => {
-    //                         tween(this.BusArr[this.currentBusidx])
-    //                             .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
-    //                             .call(() => {
-    //                                 this.currentBusidx += 1;
-    //                                 if (this.currentBusidx == 3) {
-    //                                     this.currentBusidx = 0
-    //                                 }
-    //                                 tween(this.BusArr[this.currentBusidx])
-    //                                     .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' }).call(() => {
-    //                                         this.Bidx = 0;
-    //                                         this.CheckCollector();
-    //                                         Fbus.setPosition(10.021, 4.751, 1.474);
-    //                                         Fbus.children?.forEach((child) => {
-    //                                             child.destroy();
-    //                                         })
-
-    //                                     }).start()
-    //                                 tween(this.BusArr[Lbus])
-    //                                     .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' }).start()
-
-    //                             }).start();
-    //                     }, 1.5)
-    //                 } else {
-    //                     this.CheckCollector();
-    //                 }
-
-    //             }, 0.1);
-    //         }
-
-    //     } else {
-    //         this.scheduleOnce(() => {
-    //             this.enableTouchMove = true;
-    //             input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
-    //             input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-    //             input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
-    //         }, 1.7)
-    //     }
-    // }
-
-    CheckCollector() {
+    CheckCollector(onComplete?: () => void) {
         if (this.collectorArr.length >= 5) {
+            this.collectoranim = true;
+            this.isAnimating = true;
             const matchColor = this.buscolor[this.currentBusidx];
+            const matchedIndices = [];
+    
             for (let i = 0; i <= this.collectorArr.length - 5; i += 5) {
                 const node = this.collectorArr[i];
                 if (node.name === matchColor) {
-                    // Found match at every 5th index
-                    const movingTiles = this.collectorArr.splice(i, 5);
-    
-                    this.scheduleOnce(() => {
-                        movingTiles.forEach((tileNode, index) => {
-                            this.scheduleOnce(() => {
-                                const tile = tileNode.getComponent(Box);
-                                tile.isBus = true;
-                                tile.fromcollector = true;
-                                tile.frequency = 0.5;
-                                tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
-                                this.Bidx += 1;
-                                this.Cidx -= 1;
-                            }, index * 0.05);
-                        });
-                    
-                        const totalDelay = movingTiles.length * 0.2 + 0.2;
-                    
-                        this.scheduleOnce(() => {
-                            if (this.Bidx >= 10) {
-                                this.Bidx = 0;
-                                const Fbus = this.BusArr[this.currentBusidx];
-                                let Lbus;
-                                if (this.currentBusidx === 1) {
-                                    Lbus = 0;
-                                } else if (this.currentBusidx === 2) {
-                                    Lbus = 1;
-                                } else {
-                                    Lbus = this.currentBusidx + 2;
-                                }
-                    
-                                tween(Fbus)
-                                    .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
-                                    .call(() => {
-                                        this.currentBusidx = (this.currentBusidx + 1) % 3;
-                                        const newBus = this.BusArr[this.currentBusidx];
-                                        tween(newBus)
-                                            .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' })
-                                            .call(() => {
-                                                this.Bidx = 0;
-                                                this.CheckCollector();
-                                                Fbus.setPosition(10.021, 4.751, 1.474);
-                                                Fbus.children?.forEach(child => child.destroy());
-                                            })
-                                            .start();
-                    
-                                        tween(this.BusArr[Lbus])
-                                            .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' })
-                                            .start();
-                                    })
-                                    .start();
-                            } else {
-                                this.CheckCollector();
-                            }
-                        }, totalDelay);
-                    }, 0.1);
-                    
-    
-                    return; // Only one match should trigger action
+                    matchedIndices.push(i);
                 }
             }
-        }
     
-        // No match found
-        this.scheduleOnce(() => {
-            this.enableTouchMove = true;
-            input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
-            input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-            input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
-        }, 1.7);
+            if (matchedIndices.length > 0) {
+                let globalDelay = 0;
+                let totalRemoved = 0;
+    
+                matchedIndices.forEach((startIdx, batchIdx) => {
+                    const actualIdx = startIdx - totalRemoved;
+                    const movingTiles = this.collectorArr.splice(actualIdx, 5);
+    
+                    movingTiles.forEach((tileNode, localIdx) => {
+                        this.scheduleOnce(() => {
+                            const tile = tileNode.getComponent(Box);
+                            tile.isBus = true;
+                            tile.fromcollector = true;
+                            tile.frequency = 0.5;
+                            tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
+                            this.Bidx += 1;
+                            this.Cidx -= 1;
+                        }, globalDelay + localIdx * 0.05);
+                    });
+    
+                    globalDelay += movingTiles.length * 0.05;
+                    totalRemoved += 5;
+                });
+    
+                this.scheduleOnce(() => {
+                    if (this.Bidx >= 10) {
+                        this.Bidx = 0;
+                        const Fbus = this.BusArr[this.currentBusidx];
+                        let Lbus = this.currentBusidx === 1 ? 0 :
+                                   this.currentBusidx === 2 ? 1 :
+                                   this.currentBusidx + 2;
+    
+                        tween(Fbus)
+                            .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
+                            .call(() => {
+                                this.currentBusidx = (this.currentBusidx + 1) % 3;
+                                const newBus = this.BusArr[this.currentBusidx];
+    
+                                tween(newBus)
+                                    .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' })
+                                    .call(() => {
+                                        this.Bidx = 0;
+                                        this.CheckCollector(() => {
+                                            this.isAnimating = false;
+                                            this.collectoranim = false;
+                                            onComplete?.(); // Notify caller
+                                        });
+    
+                                        Fbus.setPosition(10.021, 4.751, 1.474);
+                                        Fbus.children?.forEach(child => child.destroy());
+                                    })
+                                    .start();
+    
+                                tween(this.BusArr[Lbus])
+                                    .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' })
+                                    .start();
+                            })
+                            .start();
+                    } else {
+                        this.CheckCollector(() => {
+                            this.isAnimating = false;
+                            this.collectoranim = false;
+                            onComplete?.(); // Notify caller
+                        });
+                    }
+                }, globalDelay + 0.5);
+            } else {
+                // No match case
+                for (let i = 0; i < this.collectorArr.length; i++) {
+                    const tile = this.collectorArr[i].getComponent(Box);
+                    tile.reset(i);
+                }
+                this.isAnimating = false;
+                this.collectoranim = false;
+                onComplete?.();
+            }
+        } else {
+            this.isAnimating = false;
+            this.collectoranim = false;
+            onComplete?.();
+        }
     }
+    
+    
     
 
     private worldPositions;
     sound:boolean = true;
 
     onTouchMove(event: EventTouch) {
+        if (this.isAnimating) return;
         if(this.sound == true){
             this.audioSource.clip = this.Audioclips[3];
             this.sound = false;
@@ -428,6 +390,7 @@ export class GameManager extends Component {
     }
 
     onTouchEnd(event) {
+        if (this.isAnimating) return;
         this.sound = true;
         if (this.SelectedNode === null || !this.enableTouchMove) return;
 
@@ -448,7 +411,8 @@ export class GameManager extends Component {
     }
 
     OnStartButtonClick() {
-        
+        this.Collector.getComponent(AudioSource).stop();
+        this.audioSource.stop();
         if (sys.os === sys.OS.ANDROID ) {
             window.open("https://play.google.com/store/apps/details?id=com.Machina.SortDash&hl=en_IN&pli=1", "SortDash");
         } else if (sys.os === sys.OS.IOS) {
@@ -466,13 +430,14 @@ export class GameManager extends Component {
       update(deltaTime: number) {
         if(this.enable){
             this.dt += deltaTime;
-            if(this.dt>=30){
+            if(this.dt>=25){
                 this.Canvas.active = true;
                 this.Canvas.children[1].active = false;
                 this.Canvas.children[2].active = true;
                 this.Canvas.children[3].active = true;
                 this.Canvas.children[4].active = true;
                 this.Canvas.getChildByName("Label").active = false;
+
             }
         }
 
