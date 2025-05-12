@@ -1,5 +1,5 @@
 
-import { _decorator, AudioClip, AudioSource, BlockInputEvents, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, sys, Tween, tween, TweenAction, TweenSystem, v3, Vec3 } from 'cc';
+import { _decorator, AudioClip, AudioSource, BlockInputEvents, BoxCollider, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, sys, Tween, tween, TweenAction, TweenSystem, v3, Vec2, Vec3 } from 'cc';
 import { TileCreation } from './TileCreation';
 import { Box } from './Box';
 import { super_html_playable } from './super_html_playable';
@@ -31,6 +31,10 @@ export class GameManager extends Component {
     Canvas: Node = null;
 
     @property(Node)
+    Canvas2: Node = null;
+
+
+    @property(Node)
     BusArr: Node[] = []
 
     @property(Node)
@@ -41,7 +45,7 @@ export class GameManager extends Component {
 
     @property(Material)
     colorMaterials: Material[] = [];
-    
+
     @property(AudioClip)
     Audioclips: AudioClip[] = [];
 
@@ -60,15 +64,16 @@ export class GameManager extends Component {
     busArr: Node[] = [];
     buscolor: string[] = ["0", "3", "4", "2", "1"];
     currentBusidx = 0;
+    colliderinfo: Vec2[] = [new Vec2(2.7, 5.6), new Vec2(2, 4.2), , new Vec2(1.3, 2.7)]
+    colliderpos: number[] = [4.7, 3.4, 2, 0.6]
 
     wrongCnt = 0;
     isAnimating: boolean;
 
-    public Downnload():void
-    {
+    public Downnload(): void {
         this.super.download();
     }
-    
+
     protected start(): void {
         this.audioSource = this.node.getComponent(AudioSource);
         let nodeToAnimate = this.Canvas.getChildByName("Label");
@@ -109,7 +114,7 @@ export class GameManager extends Component {
         if (this.isAnimating) return; // Block touch during animations
         this.isAnimating = true;
         this.Collector.getComponent(AudioSource).play();
-        
+
         Tween.stopAll();
         const mousePos = event.getLocation();
         this.StartingPoint.x = mousePos.x;
@@ -129,11 +134,18 @@ export class GameManager extends Component {
 
 
             if (node.name === "Col") {
-                this.audioSource.playOneShot(this.Audioclips[0],1);
+                this.audioSource.playOneShot(this.Audioclips[0], 1);
                 let sIdx = 0;
                 this.schedule(() => {
-                    let box = node.children[node.children.length - 1].addComponent(Box);
-                    
+                    let box
+                    if (node.children?.length > 0) {
+                        box = node.children[node.children?.length - 1]?.addComponent(Box);
+                    } else {
+                        return;
+                    }
+
+
+
                     // console.log("I'm here",this.SelectedNode.getWorldPosition());
 
                     if (node.getWorldPosition().x >= 0) {
@@ -149,51 +161,40 @@ export class GameManager extends Component {
                     pos.y = Math.round(pos.y * 10) / 10;
                     pos.z = Math.round(pos.z * 10) / 10;
 
-                    if (pos.equals(new Vec3(-1.8, 0, 1.8))) {
-                        box.amplitude = 5;
-                        box.dir = 1;
-                        box.frequency = 1
-                        //   tween(box.node).to(0.001,{position: new Vec3(-2.3, 0, 2.7)}).start();
-                    } else if (pos.equals(new Vec3(0, 0, 1.8))) {
-                        box.amplitude = 7;
-                    } else if (pos.equals(new Vec3(-1.8, 0, 0))) {
-                        box.amplitude = 5;
-                    } else if (pos.equals(new Vec3(0, 0, -1.8))) {
-                        box.dir = -1
-                        box.frequency = 0.5
-                    }
 
                     if (box.node.name == this.buscolor[this.currentBusidx]) {
+                        this.colliderPosCrt(node, node.children.length);
                         box.isBus = true;
                         box.anim(this.Bidx, this.BusArr[this.currentBusidx]);
                         this.busArr.push(box.node)
                         this.Bidx += 1;
-                        this.audioSource.playOneShot(this.Audioclips[4],1);
+                        this.audioSource.playOneShot(this.Audioclips[4], 1);
                     } else if (this.Cidx <= 14) {
+                        this.colliderPosCrt(node, node.children.length);
                         box.isBus = false;
                         box.anim(this.Cidx, this.Collector);
                         this.collectorArr.push(box.node)
                         this.Cidx += 1;
-                        this.audioSource.playOneShot(this.Audioclips[4],1);
-                    }else{
-                        this.wrongCnt +=1
+                        this.audioSource.playOneShot(this.Audioclips[4], 1);
+                    } else {
+                        this.wrongCnt += 1
                     }
 
                     if (this.Bidx > 9) {
                         this.Bidx = 0;
                         let Fbus = this.BusArr[this.currentBusidx]
                         let Lbus
-                        if(this.currentBusidx ==1){
+                        if (this.currentBusidx == 1) {
                             Lbus = 0
-                        }else if(this.currentBusidx ==2){
+                        } else if (this.currentBusidx == 2) {
                             Lbus = 1
-                        }else{
+                        } else {
                             Lbus = this.currentBusidx + 2
                         }
                         this.isAnimating = true;
-                        this.collectoranim = true; 
+                        this.collectoranim = true;
                         this.scheduleOnce(() => {
-                            this.audioSource.playOneShot(this.Audioclips[1],1);
+                            this.audioSource.playOneShot(this.Audioclips[1], 1);
                             tween(this.BusArr[this.currentBusidx])
                                 .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
                                 .call(() => {
@@ -205,7 +206,7 @@ export class GameManager extends Component {
                                         .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' }).call(() => {
                                             this.Bidx = 0;
                                             this.CheckCollector();
-                                            this.enable =true;
+                                            this.enable = true;
                                             Fbus.setPosition(10.021, 4.751, 1.474);
                                             Fbus.children?.forEach((child) => {
                                                 child.destroy();
@@ -219,17 +220,17 @@ export class GameManager extends Component {
                         }, 1.5)
                     }
 
-                    sIdx+=1;
+                    sIdx += 1;
 
-                    
+
 
                 }, 0.1, 4)
-                this.scheduleOnce(()=>{
-                    if(!this.collectoranim)
-                        this.isAnimating = false; 
-                },0.6)
-               
-                 
+                this.scheduleOnce(() => {
+                    if (!this.collectoranim)
+                        this.isAnimating = false;
+                }, 0.6)
+
+
             }
 
             this.SelectedNode = null;
@@ -237,7 +238,7 @@ export class GameManager extends Component {
 
         } else {
             // No object was hit
-            this.isAnimating = false; 
+            this.isAnimating = false;
             this.SelectedNode = this.Bolock;
             this.InitialAngle = this.Bolock.eulerAngles.y;
 
@@ -247,6 +248,42 @@ export class GameManager extends Component {
 
     }
 
+    colliderPosCrt(node: Node, cnt) {
+        switch (cnt) {
+            case 20:
+                let collider = node.getComponent(BoxCollider);
+                if (collider) {
+                    let center = collider.center.clone();
+                    center.y = this.colliderpos[1];
+                    collider.center = center;
+                }
+                // node.getComponent(BoxCollider).center.y = this.colliderpos[1]
+                break;
+            case 15:
+                let collider2 = node.getComponent(BoxCollider);
+                if (collider2) {
+                    let center = collider2.center.clone();
+                    center.y = this.colliderpos[2];
+                    collider2.center = center;
+                }
+                break;
+            case 10:
+                let collider3 = node.getComponent(BoxCollider);
+                if (collider3) {
+                    let center = collider3.center.clone();
+                    center.y = this.colliderpos[3];
+                    collider3.center = center;
+                }
+                break;
+            case 5:
+                node.getComponent(BoxCollider).enabled = false;
+                break;
+
+            default:
+                break;
+        }
+    }
+
 
     CheckCollector(onComplete?: () => void) {
         if (this.collectorArr.length >= 5) {
@@ -254,52 +291,76 @@ export class GameManager extends Component {
             this.isAnimating = true;
             const matchColor = this.buscolor[this.currentBusidx];
             const matchedIndices = [];
-    
+
+            // Find all matching indices (groups of 5) where node name matches
             for (let i = 0; i <= this.collectorArr.length - 5; i += 5) {
                 const node = this.collectorArr[i];
                 if (node.name === matchColor) {
                     matchedIndices.push(i);
                 }
             }
-    
+
+            // Limit total tiles to move to 10
+            const maxTilesToMove = 10;
+            let tilesMoved = 0;
+            let globalDelay = 0;
+            let totalRemoved = 0;
+
             if (matchedIndices.length > 0) {
-                let globalDelay = 0;
-                let totalRemoved = 0;
-    
-                matchedIndices.forEach((startIdx, batchIdx) => {
+                // Collect all tiles that will be animated now
+                const tilesToAnimate = [];
+
+                for (const startIdx of matchedIndices) {
+                    // Skip groups if we have reached limit
+                    if (tilesMoved >= maxTilesToMove) break;
+
                     const actualIdx = startIdx - totalRemoved;
-                    const movingTiles = this.collectorArr.splice(actualIdx, 5);
-    
-                    movingTiles.forEach((tileNode, localIdx) => {
-                        this.scheduleOnce(() => {
-                            const tile = tileNode.getComponent(Box);
-                            tile.isBus = true;
-                            tile.fromcollector = true;
-                            tile.frequency = 0.5;
-                            tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
-                            this.Bidx += 1;
-                            this.Cidx -= 1;
-                        }, globalDelay + localIdx * 0.05);
-                    });
-    
-                    globalDelay += movingTiles.length * 0.05;
-                    totalRemoved += 5;
+                    const count = Math.min(5, maxTilesToMove - tilesMoved); // Only take needed tiles to reach max 10
+                    const movingTiles = this.collectorArr.splice(actualIdx, count);
+
+                    tilesToAnimate.push(...movingTiles);
+                    totalRemoved += count;
+                    tilesMoved += count;
+
+                    globalDelay += count * 0.05;
+                }
+
+                // Schedule animation for tilesToAnimate
+                tilesToAnimate.forEach((tileNode, idx) => {
+                    this.scheduleOnce(() => {
+                        const tile = tileNode.getComponent(Box);
+                        tile.isBus = true;
+                        tile.fromcollector = true;
+                        tile.frequency = 0.5;
+                        tile.anim(this.Bidx, this.BusArr[this.currentBusidx]);
+                        this.Bidx += 1;
+                        this.Cidx -= 1;
+                        this.audioSource.playOneShot(this.Audioclips[4], 1);
+                    }, idx * 0.05);
                 });
-    
+
+                this.scheduleOnce(() => {
+                    for (const remainingTileNode of this.collectorArr) {
+                        const tile = remainingTileNode.getComponent(Box);
+                        tile.reset(this.collectorArr.indexOf(remainingTileNode));
+                    }
+                }, 1)
+
+
                 this.scheduleOnce(() => {
                     if (this.Bidx >= 10) {
                         this.Bidx = 0;
                         const Fbus = this.BusArr[this.currentBusidx];
                         let Lbus = this.currentBusidx === 1 ? 0 :
-                                   this.currentBusidx === 2 ? 1 :
-                                   this.currentBusidx + 2;
-    
+                            this.currentBusidx === 2 ? 1 :
+                                this.currentBusidx + 2;
+
                         tween(Fbus)
                             .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
                             .call(() => {
                                 this.currentBusidx = (this.currentBusidx + 1) % 3;
                                 const newBus = this.BusArr[this.currentBusidx];
-    
+
                                 tween(newBus)
                                     .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' })
                                     .call(() => {
@@ -307,14 +368,14 @@ export class GameManager extends Component {
                                         this.CheckCollector(() => {
                                             this.isAnimating = false;
                                             this.collectoranim = false;
-                                            onComplete?.(); // Notify caller
+                                            onComplete?.();
                                         });
-    
+
                                         Fbus.setPosition(10.021, 4.751, 1.474);
                                         Fbus.children?.forEach(child => child.destroy());
                                     })
                                     .start();
-    
+
                                 tween(this.BusArr[Lbus])
                                     .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' })
                                     .start();
@@ -324,12 +385,12 @@ export class GameManager extends Component {
                         this.CheckCollector(() => {
                             this.isAnimating = false;
                             this.collectoranim = false;
-                            onComplete?.(); // Notify caller
+                            onComplete?.();
                         });
                     }
                 }, globalDelay + 0.5);
             } else {
-                // No match case
+                // No matches found: reset all tiles
                 for (let i = 0; i < this.collectorArr.length; i++) {
                     const tile = this.collectorArr[i].getComponent(Box);
                     tile.reset(i);
@@ -344,20 +405,21 @@ export class GameManager extends Component {
             onComplete?.();
         }
     }
-    
-    
-    
+
+
+
+
 
     private worldPositions;
-    sound:boolean = true;
+    sound: boolean = true;
 
     onTouchMove(event: EventTouch) {
         if (this.isAnimating) return;
-        if(this.sound == true){
+        if (this.sound == true) {
             this.audioSource.clip = this.Audioclips[3];
             this.sound = false;
             this.playAudioMultipleTimes();
-            
+
         }
         const mousePos = event.getLocation();
         if (this.SelectedNode) {
@@ -377,10 +439,10 @@ export class GameManager extends Component {
         }
 
         const playOnce = () => {
-            if (this._playIndex >= this.repeatCount || this.sound){
+            if (this._playIndex >= this.repeatCount || this.sound) {
                 this._playIndex = 0;
                 return;
-            } 
+            }
 
             this.audioSource.play();
 
@@ -419,25 +481,26 @@ export class GameManager extends Component {
     OnStartButtonClick() {
         this.Collector.getComponent(AudioSource).stop();
         this.audioSource.stop();
-        if (sys.os === sys.OS.ANDROID ) {
+        if (sys.os === sys.OS.ANDROID) {
             window.open("https://play.google.com/store/apps/details?id=com.Machina.SortDash&hl=en_IN&pli=1", "SortDash");
         } else if (sys.os === sys.OS.IOS) {
             window.open("https://apps.apple.com/us/app/sort-dash-color-match/id6737854991", "SortDash");
-        }else{
+        } else {
             window.open("https://play.google.com/store/apps/details?id=com.Machina.SortDash&hl=en_IN&pli=1", "SortDash");
         }
         this.super_html_playable.download();
 
     }
 
-      private enable = false;
-      private dt = 0;
+    private enable = false;
+    private dt = 0;
 
-      update(deltaTime: number) {
-        if(this.enable){
+    update(deltaTime: number) {
+        if (this.enable) {
             this.dt += deltaTime;
-            if(this.dt>=25 || this.wrongCnt>=15){
+            if (this.dt >= 25 || this.wrongCnt >= 15) {
                 this.Canvas.active = true;
+                this.Canvas2.active = false;
                 this.Canvas.children[1].active = false;
                 this.Canvas.children[2].active = true;
                 this.Canvas.children[3].active = true;
@@ -448,7 +511,7 @@ export class GameManager extends Component {
         }
 
 
-      }
+    }
 }
 
 /**
