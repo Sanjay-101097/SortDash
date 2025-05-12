@@ -28,6 +28,9 @@ export class GameManager extends Component {
     Bolock: Node = null;
 
     @property(Node)
+    Plane: Node = null;
+
+    @property(Node)
     Canvas: Node = null;
 
     @property(Node)
@@ -76,16 +79,21 @@ export class GameManager extends Component {
 
     protected start(): void {
         this.audioSource = this.node.getComponent(AudioSource);
-        let nodeToAnimate = this.Canvas.getChildByName("Label");
-        const zoomIn = tween(nodeToAnimate)
-            .to(0.8, { scale: v3(1.1, 1.1, 1.1) });
-        const zoomOut = tween(nodeToAnimate)
-            .to(0.8, { scale: v3(0.9, 0.9, 0.9) });
-        tween(nodeToAnimate)
-            .sequence(zoomIn, zoomOut)
-            .union()
-            .repeatForever()
-            .start();
+
+
+            this.Canvas.active = true;
+            let nodeToAnimate = this.Canvas.getChildByName("Label");
+            const zoomIn = tween(nodeToAnimate)
+                .to(0.8, { scale: v3(1.1, 1.1, 1.1) });
+            const zoomOut = tween(nodeToAnimate)
+                .to(0.8, { scale: v3(0.9, 0.9, 0.9) });
+            tween(nodeToAnimate)
+                .sequence(zoomIn, zoomOut)
+                .union()
+                .repeatForever()
+                .start();
+
+        // tween(this.Bolock).to(0.5,{eulerAngles:new Vec3(0,-90,0)})
     }
 
 
@@ -405,10 +413,6 @@ export class GameManager extends Component {
             onComplete?.();
         }
     }
-
-
-
-
 
     private worldPositions;
     sound: boolean = true;
