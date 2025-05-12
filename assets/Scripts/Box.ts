@@ -30,7 +30,7 @@ export class Box extends Component {
 
     public amplitude: number = 3;
 
-    public frequency: number = 1;
+    public frequency: number = 0.5;
     busarray: Vec3[] = [new Vec3(4.838431, 5.352991, -3.361852), new Vec3(4.700545, 5.352991, -3.499738), new Vec3(4.562659, 5.352991, -3.637624), new Vec3(4.424774, 5.352991, -3.77551), new Vec3(4.286888, 5.352991, -3.913395), new Vec3(4.149002, 5.352991, -4.051281), new Vec3(4.014652, 5.352991, -4.185632), new Vec3(3.87323, 5.352991, -4.327053), new Vec3(3.73888, 5.352991, -4.461403), new Vec3(3.60453, 5.352991, -4.595753)]
 
     collector: Vec3[] = [new Vec3(7.233585, 6.305913, -5.053686), new Vec3(7.092164, 6.305913, -5.195108), new Vec3(6.950743, 6.305913, -5.336529), new Vec3(6.809321, 6.305913, -5.47795), new Vec3(6.6679, 6.305913, -5.619372), new Vec3(6.526392, 6.305913, -5.760781), new Vec3(6.384995, 6.305913, -5.902227), new Vec3(6.243599, 6.305913, -6.043673), new Vec3(6.102202, 6.305913, -6.185119), new Vec3(5.960805, 6.305913, -6.326565), new Vec3(5.819409, 6.305913, -6.468011), new Vec3(5.678012, 6.305913, -6.609457), new Vec3(5.536615, 6.305913, -6.750903), new Vec3(5.395219, 6.305913, -6.892349), new Vec3(5.253822, 6.305913, -7.033795)]
@@ -66,7 +66,7 @@ export class Box extends Component {
         if (this.node.parent.name == "Main") {
             parentNode = this.node.parent;
             this.endPosition = this.busarray[idx];
-            this.amplitude = 5;
+            this.amplitude = 2;
             this.frequency = 0.5
             this.dir = 1;
             this.duration = 0.5
@@ -104,41 +104,43 @@ export class Box extends Component {
         // Calculate a perpendicular vector for the sine wave oscillation
         // We pick an arbitrary vector to cross with to get a perpendicular vector
         // If direction is (dx, dy, dz), pick world up vector for cross unless parallel
-        const worldUp = new Vec3(0, 1, 0);
+        const worldUp = new Vec3(1, 0, 0);
         this.perpendicular = new Vec3();
 
-        // If direction is close to up vector, choose another vector
-        if (Math.abs(Vec3.dot(this.direction, worldUp)) > 0.99) {
-            // Use (1,0,0) if direction is parallel or almost parallel
-            Vec3.cross(this.perpendicular, this.direction, new Vec3(1, 0, 0));
-        } else {
-            Vec3.cross(this.perpendicular, this.direction, worldUp);
-        }
-        Vec3.normalize(this.perpendicular, this.perpendicular);
         const pos = this.startPosition;
         pos.x = Math.round(pos.x * 10) / 10;
         pos.y = Math.round(pos.y * 10) / 10;
         pos.z = Math.round(pos.z * 10) / 10;
-
-        if (pos.x <= -1.8 && pos.z >= 1.8) {
-            tween(this.node)
-                .to(0.1, { position: new Vec3(-3, 4, 3.2) }, { easing: 'sineIn' })
-                .call(() => {
-                    this.isanim = true;
-                    this.startPosition = new Vec3(-3, 4, 3.2);
-                }).start();
-
-        } else if (pos.x <= -1.8 && pos.z == 0) {
-            tween(this.node)
-                .to(0.1, { position: new Vec3(-3.8, this.startPosition.y, 0.3) }, { easing: 'sineIn' })
-                .call(() => {
-                    this.isanim = true;
-                    this.startPosition = new Vec3(-3.8, this.startPosition.y, 0.3);
-                }).start();
+        // If direction is close to up vector, choose another vector
+        let a = Math.abs(Vec3.dot(this.direction, worldUp))
+        if (pos.x > -1.8 && !this.fromcollector) {
+            // Use (1,0,0) if direction is parallel or almost parallel
+            Vec3.cross(this.perpendicular, this.direction, new Vec3(-1, 0, 0));
+        } else {
+            Vec3.cross(this.perpendicular, this.direction, worldUp);
         }
-        else {
+        Vec3.normalize(this.perpendicular, this.perpendicular);
+
+
+        // if (pos.x <= -1.8 && pos.z >= 1.8) {
+            // tween(this.node)
+            //     .to(0.05, { position: new Vec3(this.node.x, 4, this.node.z) }, { easing: 'sineIn' })
+            //     .call(() => {
+            //         this.isanim = true;
+            //         this.startPosition = new Vec3(this.node.x, 4, this.node.z);
+            //     }).start();
+
+        // } else if (pos.x <= -1.8 && pos.z == 0) {
+        //     tween(this.node)
+        //         .to(0.1, { position: new Vec3(-3.8, this.startPosition.y, 0.3) }, { easing: 'sineIn' })
+        //         .call(() => {
+        //             this.isanim = true;
+        //             this.startPosition = new Vec3(-3.8, this.startPosition.y, 0.3);
+        //         }).start();
+        // }
+        // else {
             this.isanim = true;
-        }
+        // }
 
 
 
@@ -176,16 +178,12 @@ export class Box extends Component {
             const scale = 1 + (0.7 - 1) * t // Scale down to 70% of original size
             this.node.setScale(scale, scale, scale)
 
-        }
-        let targetRotation;
-        if (!this.isBus) {
-            targetRotation = this.collectorRotation
-        }else{
-            targetRotation = this.BusRotation
-        }
-        
-        //  new Vec3(0, -45, 90);
-        if (this.rotationElapsed < this.rotationDuration && this.timeElapsed > 0.7) {
+            let targetRotation;
+            // if (!this.isBus) {
+                targetRotation = this.collectorRotation
+            // }else{
+            //     targetRotation = this.BusRotation
+            // }
             this.rotationElapsed += deltaTime;
             let rt = this.rotationElapsed / this.rotationDuration;
             if (rt > 1) rt = 1;
@@ -197,8 +195,15 @@ export class Box extends Component {
             const newZ = lerpAngle(currentEuler.z, targetRotation.z, rt);
             this.node.eulerAngles = new Vec3(newX, newY, newZ);
             let parentNode;
-            
+
         }
+
+        
+        //  new Vec3(0, -45, 90);
+        // if (this.rotationElapsed < this.rotationDuration && this.timeElapsed < 0.2) {
+
+            
+        // }
         // console.log("notworking",this.isBus,this.timeElapsed)
         let duriation = this.fromcollector? 0.5: 1;
         if (this.isBus &&  this.timeElapsed >= duriation) {
