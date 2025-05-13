@@ -153,7 +153,7 @@ export class Box extends Component {
     update(deltaTime: number) {
         if (!this.isanim) return;
         if (this.timeElapsed < this.duration) {
-            this.timeElapsed += deltaTime;
+            this.timeElapsed += deltaTime * 3.5;
             let t = this.timeElapsed / this.duration;
             if (t > 1) t = 1;
 
@@ -184,7 +184,7 @@ export class Box extends Component {
             // }else{
             //     targetRotation = this.BusRotation
             // }
-            this.rotationElapsed += deltaTime;
+            this.rotationElapsed += deltaTime * 3.5;
             let rt = this.rotationElapsed / this.rotationDuration;
             if (rt > 1) rt = 1;
             const currentEuler = this.node.eulerAngles;

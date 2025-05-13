@@ -225,7 +225,7 @@ export class GameManager extends Component {
                                         .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' }).start()
 
                                 }).start();
-                        }, 1.5)
+                        }, 0.5)
                     }
 
                     sIdx += 1;
