@@ -1,9 +1,34 @@
+import {
+    _decorator,
+    AudioClip,
+    AudioSource,
+    BlockInputEvents,
+    BoxCollider,
+    Camera,
+    Component,
+    EventTouch,
+    geometry,
+    Input,
+    input,
+    Material,
+    Node,
+    PhysicsSystem,
+    RigidBody,
+    sys,
+    Tween,
+    tween,
+    TweenAction,
+    TweenSystem,
+    v3,
+    Vec2,
+    Vec3,
+   
+} from 'cc';
+import {TileCreation} from './TileCreation';
+import {Box} from './Box';
+import {super_html_playable} from './super_html_playable';
 
-import { _decorator, AudioClip, AudioSource, BlockInputEvents, BoxCollider, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, sys, Tween, tween, TweenAction, TweenSystem, v3, Vec2, Vec3 } from 'cc';
-import { TileCreation } from './TileCreation';
-import { Box } from './Box';
-import { super_html_playable } from './super_html_playable';
-const { ccclass, property } = _decorator;
+const {ccclass, property} = _decorator;
 
 /**
  * Predefined variables
@@ -52,6 +77,9 @@ export class GameManager extends Component {
     @property(AudioClip)
     Audioclips: AudioClip[] = [];
 
+  @property (Animation)
+  
+ 
 
     super_html_playable: super_html_playable = new super_html_playable();
     private _ray: geometry.Ray = new geometry.Ray();
@@ -73,6 +101,10 @@ export class GameManager extends Component {
     wrongCnt = 0;
     isAnimating: boolean;
 
+
+    // Reference to the Animation component attached to this node
+
+
     public Downnload(): void {
         this.super.download();
     }
@@ -81,17 +113,19 @@ export class GameManager extends Component {
         this.audioSource = this.node.getComponent(AudioSource);
 
 
-            this.Canvas.active = true;
-            let nodeToAnimate = this.Canvas.getChildByName("Label");
-            const zoomIn = tween(nodeToAnimate)
-                .to(0.8, { scale: v3(1.1, 1.1, 1.1) });
-            const zoomOut = tween(nodeToAnimate)
-                .to(0.8, { scale: v3(0.9, 0.9, 0.9) });
-            tween(nodeToAnimate)
-                .sequence(zoomIn, zoomOut)
-                .union()
-                .repeatForever()
-                .start();
+        this.Canvas.active = true;
+        let nodeToAnimate = this.Canvas.getChildByName("Label");
+        const zoomIn = tween(nodeToAnimate)
+            .to(0.8, {scale: v3(1.1, 1.1, 1.1)});
+        const zoomOut = tween(nodeToAnimate)
+            .to(0.8, {scale: v3(0.9, 0.9, 0.9)});
+        tween(nodeToAnimate)
+            .sequence(zoomIn, zoomOut)
+            .union()
+            .repeatForever()
+            .start();
+
+       // this.animation.play();
 
         // tween(this.Bolock).to(0.5,{eulerAngles:new Vec3(0,-90,0)})
     }
@@ -102,7 +136,6 @@ export class GameManager extends Component {
         input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
         input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
     }
-
 
 
     onDisable() {
@@ -151,7 +184,6 @@ export class GameManager extends Component {
                     } else {
                         return;
                     }
-
 
 
                     // console.log("I'm here",this.SelectedNode.getWorldPosition());
@@ -204,32 +236,31 @@ export class GameManager extends Component {
                         this.scheduleOnce(() => {
                             this.audioSource.playOneShot(this.Audioclips[1], 1);
                             tween(this.BusArr[this.currentBusidx])
-                                .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
+                                .to(0.3, {position: new Vec3(-6.096, 4.751, -14.643)}, {easing: 'sineIn'})
                                 .call(() => {
                                     this.currentBusidx += 1;
                                     if (this.currentBusidx == 3) {
                                         this.currentBusidx = 0
                                     }
                                     tween(this.BusArr[this.currentBusidx])
-                                        .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' }).call(() => {
-                                            this.Bidx = 0;
-                                            this.CheckCollector();
-                                            this.enable = true;
-                                            Fbus.setPosition(10.021, 4.751, 1.474);
-                                            Fbus.children?.forEach((child) => {
-                                                child.destroy();
-                                            })
+                                        .to(0.3, {position: new Vec3(4.386, 4.751, -4.161)}, {easing: 'sineIn'}).call(() => {
+                                        this.Bidx = 0;
+                                        this.CheckCollector();
+                                        this.enable = true;
+                                        Fbus.setPosition(10.021, 4.751, 1.474);
+                                        Fbus.children?.forEach((child) => {
+                                            child.destroy();
+                                        })
 
-                                        }).start()
+                                    }).start()
                                     tween(this.BusArr[Lbus])
-                                        .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' }).start()
+                                        .to(0.3, {position: new Vec3(7.08, 4.751, -1.467)}, {easing: 'sineIn'}).start()
 
                                 }).start();
                         }, 0.5)
                     }
 
                     sIdx += 1;
-
 
 
                 }, 0.1, 4)
@@ -364,13 +395,13 @@ export class GameManager extends Component {
                                 this.currentBusidx + 2;
 
                         tween(Fbus)
-                            .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
+                            .to(0.3, {position: new Vec3(-6.096, 4.751, -14.643)}, {easing: 'sineIn'})
                             .call(() => {
                                 this.currentBusidx = (this.currentBusidx + 1) % 3;
                                 const newBus = this.BusArr[this.currentBusidx];
 
                                 tween(newBus)
-                                    .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' })
+                                    .to(0.3, {position: new Vec3(4.386, 4.751, -4.161)}, {easing: 'sineIn'})
                                     .call(() => {
                                         this.Bidx = 0;
                                         this.CheckCollector(() => {
@@ -385,7 +416,7 @@ export class GameManager extends Component {
                                     .start();
 
                                 tween(this.BusArr[Lbus])
-                                    .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' })
+                                    .to(0.3, {position: new Vec3(7.08, 4.751, -1.467)}, {easing: 'sineIn'})
                                     .start();
                             })
                             .start();
@@ -477,6 +508,7 @@ export class GameManager extends Component {
     FixRotPos(n) {
         return Math.round(n / 90) * 90;
     }
+
     calculateRotation(fromAngle: number, toAngle: number): number {
         let rotation = toAngle - fromAngle;
         return rotation;

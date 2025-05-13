@@ -80,7 +80,7 @@
             "_value": true
           },
           "particle": {
-            "_value": true
+            "_value": false
           },
           "physics": {
             "_value": true,
@@ -226,7 +226,6 @@
           "gfx-webgl",
           "light-probe",
           "marionette",
-          "particle",
           "physics-ammo",
           "primitive",
           "profiler",

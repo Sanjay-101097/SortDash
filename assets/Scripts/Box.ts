@@ -235,13 +235,9 @@ export class Box extends Component {
                     // 4. Reparent
                     this.node.removeFromParent();
                     this.Bus.addChild(this.node);
-
                     // 5. Apply converted local transform
                     this.node.setPosition(localPos);
                     this.node.setRotationFromEuler(0,0,90);
-                
-
-
             }
 
         }

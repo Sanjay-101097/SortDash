@@ -71,7 +71,7 @@
       "occlusion": 1,
       "roughness": 0,
       "mainTexture": {
-        "__uuid__": "26063e1e-3fad-4421-9677-1082b9270c86@6c48a",
+        "__uuid__": "5825374d-52ff-4442-b05b-d33f24ad02c6@6c48a",
         "__expectedType__": "cc.Texture2D"
       }
     },
