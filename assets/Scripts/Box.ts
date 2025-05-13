@@ -25,7 +25,7 @@ export class Box extends Component {
     endPosition: Vec3;
 
 
-    public duration: number = 1;
+    public duration: number = 0.3;
 
 
     public amplitude: number = 3;
@@ -48,10 +48,10 @@ export class Box extends Component {
     Bus
     fromcollector: boolean = false;
 
-    reset(idx){
+    reset(idx) {
         tween(this.node)
-        .to(0.05, { position: this.collector[idx] }, { easing: 'sineIn' })
-        .start();
+            .to(0.05, { position: this.collector[idx] }, { easing: 'sineIn' })
+            .start();
     }
 
     anim(idx, node) {
@@ -78,14 +78,12 @@ export class Box extends Component {
                 this.endPosition = this.collector[idx];
             } else {
                 this.endPosition = this.busarray[idx];
-            
+
             }
 
         }
 
         const worldPos = this.node.getWorldPosition();
-
-
         this.node.removeFromParent();
         parentNode.addChild(this.node);
 
@@ -97,13 +95,8 @@ export class Box extends Component {
 
         this.startPosition = new Vec3(this.node.getPosition().x, this.node.position.y, this.node.position.z);
 
-        // Calculate direction vector from start to end
         Vec3.subtract(this.direction, this.endPosition, this.startPosition);
         Vec3.normalize(this.direction, this.direction);
-
-        // Calculate a perpendicular vector for the sine wave oscillation
-        // We pick an arbitrary vector to cross with to get a perpendicular vector
-        // If direction is (dx, dy, dz), pick world up vector for cross unless parallel
         const worldUp = new Vec3(1, 0, 0);
         this.perpendicular = new Vec3();
 
@@ -111,36 +104,15 @@ export class Box extends Component {
         pos.x = Math.round(pos.x * 10) / 10;
         pos.y = Math.round(pos.y * 10) / 10;
         pos.z = Math.round(pos.z * 10) / 10;
-        // If direction is close to up vector, choose another vector
         let a = Math.abs(Vec3.dot(this.direction, worldUp))
         if (pos.x > -1.8 && !this.fromcollector) {
-            // Use (1,0,0) if direction is parallel or almost parallel
+
             Vec3.cross(this.perpendicular, this.direction, new Vec3(-1, 0, 0));
         } else {
             Vec3.cross(this.perpendicular, this.direction, worldUp);
         }
         Vec3.normalize(this.perpendicular, this.perpendicular);
-
-
-        // if (pos.x <= -1.8 && pos.z >= 1.8) {
-            // tween(this.node)
-            //     .to(0.05, { position: new Vec3(this.node.x, 4, this.node.z) }, { easing: 'sineIn' })
-            //     .call(() => {
-            //         this.isanim = true;
-            //         this.startPosition = new Vec3(this.node.x, 4, this.node.z);
-            //     }).start();
-
-        // } else if (pos.x <= -1.8 && pos.z == 0) {
-        //     tween(this.node)
-        //         .to(0.1, { position: new Vec3(-3.8, this.startPosition.y, 0.3) }, { easing: 'sineIn' })
-        //         .call(() => {
-        //             this.isanim = true;
-        //             this.startPosition = new Vec3(-3.8, this.startPosition.y, 0.3);
-        //         }).start();
-        // }
-        // else {
-            this.isanim = true;
-        // }
+        this.isanim = true;
 
 
 
@@ -149,104 +121,91 @@ export class Box extends Component {
     isanim = false;
     private rotationElapsed: number = 0;
     private rotationDuration: number = 1;
+    private readonly referenceDuration: number = 1;
     enabl = true;
     update(deltaTime: number) {
         if (!this.isanim) return;
-        if (this.timeElapsed < this.duration) {
-            this.timeElapsed += deltaTime;
-            let t = this.timeElapsed / this.duration;
-            if (t > 1) t = 1;
-
-            // Linear interpolation from start to end
-            const basePos = new Vec3();
-            basePos.x = this.startPosition.x + (this.endPosition.x - this.startPosition.x) * t;
-            basePos.y = this.startPosition.y + (this.endPosition.y - this.startPosition.y) * t;
-            basePos.z = this.startPosition.z + (this.endPosition.z - this.startPosition.z) * t;
-
-            // Calculate sine wave offset
-            // sine varies between -1 and 1
-            const sineValue = this.dir * Math.sin(2 * Math.PI * this.frequency * t);
-            const offset = new Vec3();
-            Vec3.multiplyScalar(offset, this.perpendicular, this.amplitude * sineValue);
-
-            // Add offset to base position
-            const finalPos = new Vec3();
-            Vec3.add(finalPos, basePos, offset);
-
-            this.node.setPosition(finalPos);
-
-            const scale = 1 + (0.7 - 1) * t // Scale down to 70% of original size
-            this.node.setScale(scale, scale, scale)
-
-            let targetRotation;
-            // if (!this.isBus) {
-                targetRotation = this.collectorRotation
-            // }else{
-            //     targetRotation = this.BusRotation
-            // }
-            this.rotationElapsed += deltaTime;
-            let rt = this.rotationElapsed / this.rotationDuration;
-            if (rt > 1) rt = 1;
-            const currentEuler = this.node.eulerAngles;
-            // Linear interpolate each axis
-            const lerpAngle = (start: number, end: number, alpha: number) => start + (end - start) * alpha;
-            const newX = lerpAngle(currentEuler.x, targetRotation.x, rt);
-            const newY = lerpAngle(currentEuler.y, targetRotation.y, rt);
-            const newZ = lerpAngle(currentEuler.z, targetRotation.z, rt);
-            this.node.eulerAngles = new Vec3(newX, newY, newZ);
-            let parentNode;
-
-        }
-
+    
+        // this.timeElapsed += deltaTime;
+        // let t = this.timeElapsed / this.duration;
+        // if (t > 1) t = 1;
+    
+        this.timeElapsed += deltaTime;
+        let t = this.timeElapsed / this.duration;
+        if (t > 1) t = 1;
         
-        //  new Vec3(0, -45, 90);
-        // if (this.rotationElapsed < this.rotationDuration && this.timeElapsed < 0.2) {
-
-            
-        // }
-        // console.log("notworking",this.isBus,this.timeElapsed)
-        let duriation = this.fromcollector? 0.5: 1;
-        if (this.isBus &&  this.timeElapsed >= duriation) {
+        const basePos = new Vec3();
+        Vec3.lerp(basePos, this.startPosition, this.endPosition, t);
+        
+        const waveProgress = this.timeElapsed * this.frequency;
+        const sineOffset = Math.sin(  Math.PI * t) * this.amplitude * this.dir;
+        
+        const offset = new Vec3();
+        Vec3.multiplyScalar(offset, this.perpendicular, sineOffset);
+        
+        const finalPos = new Vec3();
+        Vec3.add(finalPos, basePos, offset);
+        this.node.setPosition(finalPos);
+        
+        // Stop only when fully done
+        if (t >= 1) {
+            // this.node.setPosition(this.endPosition); // Optional: snap to final pos
             this.isanim = false;
-
-            if (this.node.position.x <= this.busarray[this.idx].x + 0.01 && this.node.position.x >= this.busarray[this.idx].x - 0.01) {
-                // 1. Get world position and world rotation BEFORE reparenting
-                   
-                    const worldPos = this.node.getWorldPosition();
-                    const worldRot = this.node.getWorldRotation();
-
-                    // 2. Convert world position to local space of the new parent BEFORE reparenting
-                    const localPos = new Vec3();
-                    this.Bus.inverseTransformPoint(localPos, worldPos);
-
-                    // 3. Convert world rotation to local rotation
-                    const worldRotQuat = new Quat();
-                    this.node.getWorldRotation(worldRotQuat);
-
-                    const parentWorldRot = new Quat();
-                    this.Bus.getWorldRotation(parentWorldRot);
-
-                    // Invert parent's world rotation and apply to node's world rotation to get local rotation
-                    const parentWorldRotInv = new Quat();
-                    Quat.invert(parentWorldRotInv, parentWorldRot); // safely creates inverse
-                    const localRot = new Quat();
-                    Quat.multiply(localRot, parentWorldRotInv, worldRotQuat); // localRot = inverse(parentRot) * worldRot
-
-                    // 4. Reparent
-                    this.node.removeFromParent();
-                    this.Bus.addChild(this.node);
-
-                    // 5. Apply converted local transform
-                    this.node.setPosition(localPos);
-                    this.node.setRotationFromEuler(0,0,90);
-                
-
-
-            }
-
         }
-
+        
+    
+        // Scale animation
+        const scale = 1 + (0.7 - 1) * t;
+        this.node.setScale(scale, scale, scale);
+    
+        // Rotation interpolation
+        this.rotationElapsed += deltaTime;
+        let rt = this.rotationElapsed / this.rotationDuration;
+        if (rt > 1) rt = 1;
+    
+        const lerpAngle = (start: number, end: number, alpha: number) => start + (end - start) * alpha;
+        const currentEuler = this.node.eulerAngles;
+        this.node.eulerAngles = new Vec3(
+            lerpAngle(currentEuler.x, this.collectorRotation.x, rt),
+            lerpAngle(currentEuler.y, this.collectorRotation.y, rt),
+            lerpAngle(currentEuler.z, this.collectorRotation.z, rt)
+        );
+    
+        // Reparenting logic
+        if (this.timeElapsed >= this.duration) {
+            this.isanim = false;
+    
+            if (this.isBus &&
+                this.node.position.x <= this.busarray[this.idx].x + 0.01 &&
+                this.node.position.x >= this.busarray[this.idx].x - 0.01) {
+    
+                const worldPos = this.node.getWorldPosition();
+                const worldRot = this.node.getWorldRotation();
+    
+                const localPos = new Vec3();
+                this.Bus.inverseTransformPoint(localPos, worldPos);
+    
+                const worldRotQuat = new Quat();
+                this.node.getWorldRotation(worldRotQuat);
+    
+                const parentWorldRot = new Quat();
+                this.Bus.getWorldRotation(parentWorldRot);
+    
+                const parentWorldRotInv = new Quat();
+                Quat.invert(parentWorldRotInv, parentWorldRot);
+    
+                const localRot = new Quat();
+                Quat.multiply(localRot, parentWorldRotInv, worldRotQuat);
+    
+                this.node.removeFromParent();
+                this.Bus.addChild(this.node);
+    
+                this.node.setPosition(localPos);
+                this.node.setRotationFromEuler(0, 0, 90);
+            }
+        }
     }
+    
 
     // Optional: reset animation
     public resetAnimation() {

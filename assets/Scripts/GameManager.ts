@@ -204,14 +204,14 @@ export class GameManager extends Component {
                         this.scheduleOnce(() => {
                             this.audioSource.playOneShot(this.Audioclips[1], 1);
                             tween(this.BusArr[this.currentBusidx])
-                                .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
+                                .to(0.15, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'quadInOut' })
                                 .call(() => {
                                     this.currentBusidx += 1;
                                     if (this.currentBusidx == 3) {
                                         this.currentBusidx = 0
                                     }
                                     tween(this.BusArr[this.currentBusidx])
-                                        .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' }).call(() => {
+                                        .to(0.15, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'quadInOut' }).call(() => {
                                             this.Bidx = 0;
                                             this.CheckCollector();
                                             this.enable = true;
@@ -222,10 +222,10 @@ export class GameManager extends Component {
 
                                         }).start()
                                     tween(this.BusArr[Lbus])
-                                        .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' }).start()
+                                        .to(0.15, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'quadInOut' }).start()
 
                                 }).start();
-                        }, 1.5)
+                        }, 0.7)
                     }
 
                     sIdx += 1;
@@ -236,7 +236,7 @@ export class GameManager extends Component {
                 this.scheduleOnce(() => {
                     if (!this.collectoranim)
                         this.isAnimating = false;
-                }, 0.6)
+                }, 0.4)
 
 
             }
@@ -352,7 +352,7 @@ export class GameManager extends Component {
                         const tile = remainingTileNode.getComponent(Box);
                         tile.reset(this.collectorArr.indexOf(remainingTileNode));
                     }
-                }, 1)
+                }, 0.9)
 
 
                 this.scheduleOnce(() => {
@@ -364,13 +364,13 @@ export class GameManager extends Component {
                                 this.currentBusidx + 2;
 
                         tween(Fbus)
-                            .to(0.3, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'sineIn' })
+                            .to(0.15, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'quadInOut' })
                             .call(() => {
                                 this.currentBusidx = (this.currentBusidx + 1) % 3;
                                 const newBus = this.BusArr[this.currentBusidx];
 
                                 tween(newBus)
-                                    .to(0.3, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'sineIn' })
+                                    .to(0.15, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'quadInOut' })
                                     .call(() => {
                                         this.Bidx = 0;
                                         this.CheckCollector(() => {
@@ -385,7 +385,7 @@ export class GameManager extends Component {
                                     .start();
 
                                 tween(this.BusArr[Lbus])
-                                    .to(0.3, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'sineIn' })
+                                    .to(0.15, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'quadInOut' })
                                     .start();
                             })
                             .start();
