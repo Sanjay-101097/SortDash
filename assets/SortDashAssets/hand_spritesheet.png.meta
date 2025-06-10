@@ -2,7 +2,7 @@
   "ver": "1.0.27",
   "importer": "image",
   "imported": true,
-  "uuid": "26063e1e-3fad-4421-9677-1082b9270c86",
+  "uuid": "f5d30b80-a8ab-416c-926b-f44bb2cd7189",
   "files": [
     ".json",
     ".png"
@@ -10,8 +10,8 @@
   "subMetas": {
     "6c48a": {
       "importer": "texture",
-      "uuid": "26063e1e-3fad-4421-9677-1082b9270c86@6c48a",
-      "displayName": "BG",
+      "uuid": "f5d30b80-a8ab-416c-926b-f44bb2cd7189@6c48a",
+      "displayName": "hand_spritesheet",
       "id": "6c48a",
       "name": "texture",
       "userData": {
@@ -22,7 +22,7 @@
         "mipfilter": "none",
         "anisotropy": 0,
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "26063e1e-3fad-4421-9677-1082b9270c86",
+        "imageUuidOrDatabaseUri": "f5d30b80-a8ab-416c-926b-f44bb2cd7189",
         "visible": false
       },
       "ver": "1.0.22",
@@ -37,6 +37,6 @@
     "type": "texture",
     "hasAlpha": true,
     "fixAlphaTransparencyArtifacts": false,
-    "redirect": "26063e1e-3fad-4421-9677-1082b9270c86@6c48a"
+    "redirect": "f5d30b80-a8ab-416c-926b-f44bb2cd7189@6c48a"
   }
 }

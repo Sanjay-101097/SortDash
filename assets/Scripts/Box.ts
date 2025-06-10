@@ -105,7 +105,7 @@ export class Box extends Component {
         pos.y = Math.round(pos.y * 10) / 10;
         pos.z = Math.round(pos.z * 10) / 10;
         let a = Math.abs(Vec3.dot(this.direction, worldUp))
-        if (pos.x > -1.8 && !this.fromcollector) {
+        if (pos.x > -1.5 && !this.fromcollector) {
 
             Vec3.cross(this.perpendicular, this.direction, new Vec3(-1, 0, 0));
         } else {

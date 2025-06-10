@@ -68,7 +68,7 @@ export class GameManager extends Component {
     buscolor: string[] = ["0", "3", "4", "2", "1"];
     currentBusidx = 0;
     colliderinfo: Vec2[] = [new Vec2(2.7, 5.6), new Vec2(2, 4.2), , new Vec2(1.3, 2.7)]
-    colliderpos: number[] = [4.7, 3.4, 2, 0.6]
+    colliderpos: number[] = [7.3,6,4.7, 3.4, 2, 0.6]
 
     wrongCnt = 0;
     isAnimating: boolean;
@@ -121,7 +121,7 @@ export class GameManager extends Component {
         // this.anim();
         if (this.isAnimating) return; // Block touch during animations
         this.isAnimating = true;
-        this.Collector.getComponent(AudioSource).play();
+        // this.Collector.getComponent(AudioSource).play();
 
         Tween.stopAll();
         const mousePos = event.getLocation();
@@ -258,7 +258,7 @@ export class GameManager extends Component {
 
     colliderPosCrt(node: Node, cnt) {
         switch (cnt) {
-            case 20:
+            case 30:
                 let collider = node.getComponent(BoxCollider);
                 if (collider) {
                     let center = collider.center.clone();
@@ -267,7 +267,7 @@ export class GameManager extends Component {
                 }
                 // node.getComponent(BoxCollider).center.y = this.colliderpos[1]
                 break;
-            case 15:
+            case 25:
                 let collider2 = node.getComponent(BoxCollider);
                 if (collider2) {
                     let center = collider2.center.clone();
@@ -275,7 +275,7 @@ export class GameManager extends Component {
                     collider2.center = center;
                 }
                 break;
-            case 10:
+            case 20:
                 let collider3 = node.getComponent(BoxCollider);
                 if (collider3) {
                     let center = collider3.center.clone();
@@ -283,8 +283,14 @@ export class GameManager extends Component {
                     collider3.center = center;
                 }
                 break;
-            case 5:
-                node.getComponent(BoxCollider).enabled = false;
+            case 15:
+                // node.getComponent(BoxCollider).enabled = false;
+                let collider4 = node.getComponent(BoxCollider);
+                if (collider4) {
+                    let center = collider4.center.clone();
+                    center.y = this.colliderpos[3];
+                    collider4.center = center;
+                }
                 break;
 
             default:

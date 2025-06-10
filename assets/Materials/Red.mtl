@@ -2,6 +2,7 @@
   "__type__": "cc.Material",
   "_name": "",
   "_objFlags": 0,
+  "__editorExtras__": {},
   "_native": "",
   "_effectAsset": {
     "__uuid__": "1baf0fc9-befa-459c-8bdd-af1a450a0319",
@@ -12,6 +13,8 @@
     {
       "USE_INSTANCING": true
     },
+    {},
+    {},
     {},
     {}
   ],
@@ -25,30 +28,57 @@
         ]
       }
     },
-    {},
-    {}
+    {
+      "rasterizerState": {},
+      "depthStencilState": {},
+      "blendState": {
+        "targets": [
+          {}
+        ]
+      }
+    },
+    {
+      "rasterizerState": {},
+      "depthStencilState": {},
+      "blendState": {
+        "targets": [
+          {}
+        ]
+      }
+    },
+    {
+      "rasterizerState": {},
+      "depthStencilState": {},
+      "blendState": {
+        "targets": [
+          {}
+        ]
+      }
+    },
+    {
+      "rasterizerState": {},
+      "depthStencilState": {},
+      "blendState": {
+        "targets": [
+          {}
+        ]
+      }
+    }
   ],
   "_props": [
     {
       "mainColor": {
         "__type__": "cc.Color",
-        "r": 184,
-        "g": 61,
-        "b": 61,
+        "r": 217,
+        "g": 52,
+        "b": 37,
         "a": 255
       },
       "occlusion": 1,
-      "roughness": 1,
-      "metallic": 0,
-      "SpecularIntensity": 0,
-      "emissive": {
-        "__type__": "cc.Color",
-        "r": 124,
-        "g": 26,
-        "b": 26,
-        "a": 255
-      }
+      "roughness": 1
     },
+    {},
+    {},
     {},
     {}
   ]
