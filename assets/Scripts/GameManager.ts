@@ -1,5 +1,5 @@
 
-import { _decorator, AudioClip, AudioSource, BlockInputEvents, BoxCollider, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, sys, Tween, tween, TweenAction, TweenSystem, v3, Vec2, Vec3 } from 'cc';
+import { _decorator, AudioClip, AudioSource, BlockInputEvents, BoxCollider, Camera, Component, EventTouch, geometry, Input, input, Material, Node, PhysicsSystem, RigidBody, Sprite, SpriteFrame, sys, Tween, tween, TweenAction, TweenSystem, UITransform, v3, Vec2, Vec3, view } from 'cc';
 import { TileCreation } from './TileCreation';
 import { Box } from './Box';
 import { super_html_playable } from './super_html_playable';
@@ -52,6 +52,9 @@ export class GameManager extends Component {
     @property(AudioClip)
     Audioclips: AudioClip[] = [];
 
+    @property(SpriteFrame)
+    HandSF: SpriteFrame[] = [];
+
 
     super_html_playable: super_html_playable = new super_html_playable();
     private _ray: geometry.Ray = new geometry.Ray();
@@ -68,7 +71,7 @@ export class GameManager extends Component {
     buscolor: string[] = ["0", "3", "4", "2", "1"];
     currentBusidx = 0;
     colliderinfo: Vec2[] = [new Vec2(2.7, 5.6), new Vec2(2, 4.2), , new Vec2(1.3, 2.7)]
-    colliderpos: number[] = [7.3,6,4.7, 3.4, 2, 0.6]
+    colliderpos: number[] = [7.3, 6, 4.7, 3.4, 2, 0.6]
 
     wrongCnt = 0;
     isAnimating: boolean;
@@ -81,19 +84,54 @@ export class GameManager extends Component {
         this.audioSource = this.node.getComponent(AudioSource);
 
 
-            this.Canvas.active = true;
-            let nodeToAnimate = this.Canvas.getChildByName("Label");
-            const zoomIn = tween(nodeToAnimate)
-                .to(0.8, { scale: v3(1.1, 1.1, 1.1) });
-            const zoomOut = tween(nodeToAnimate)
-                .to(0.8, { scale: v3(0.9, 0.9, 0.9) });
-            tween(nodeToAnimate)
-                .sequence(zoomIn, zoomOut)
-                .union()
-                .repeatForever()
-                .start();
+        this.Canvas.active = true;
+        let nodeToAnimate = this.Canvas.getChildByName("Label");
+        const zoomIn = tween(nodeToAnimate)
+            .to(0.8, { scale: v3(1.1, 1.1, 1.1) });
+        const zoomOut = tween(nodeToAnimate)
+            .to(0.8, { scale: v3(0.9, 0.9, 0.9) });
+        tween(nodeToAnimate)
+            .sequence(zoomIn, zoomOut)
+            .union()
+            .repeatForever()
+            .start();
 
         // tween(this.Bolock).to(0.5,{eulerAngles:new Vec3(0,-90,0)})
+        this.scheduleOnce(() => {
+            this.sethandpos();
+        }, 0.1)
+    }
+
+    sethandpos() {
+        const visibleSize = view.getVisibleSizeInPixel();
+        const height = window.innerHeight;
+        let xdiff = 20;
+        let ydiff = -30;
+
+        if (height >= 800) {
+            xdiff = 0
+            ydiff = 0
+        }
+
+        let nodeToAnimate = this.Canvas.getChildByName("BubbleIdle")
+        nodeToAnimate.setPosition(-220 + xdiff, 158 + ydiff)
+        const change = tween(nodeToAnimate).delay(0.3)
+            .call(() => {
+                nodeToAnimate.getComponent(Sprite).spriteFrame = this.HandSF[1];
+            })
+            .delay(0.3)
+            .call(() => {
+                nodeToAnimate.getComponent(Sprite).spriteFrame = this.HandSF[0];
+            })
+        const In = tween(nodeToAnimate)
+            .to(0.8, { position: v3(-109 + xdiff, 93 + ydiff, 1.1) });
+        const Out = tween(nodeToAnimate)
+            .to(0.8, { position: v3(-220 + xdiff, 158 + ydiff, 0) });
+        tween(nodeToAnimate)
+            .sequence(change, In, change, Out)
+            .union()
+            .repeatForever()
+            .start();
     }
 
 
@@ -201,31 +239,33 @@ export class GameManager extends Component {
                         }
                         this.isAnimating = true;
                         this.collectoranim = true;
-                        this.scheduleOnce(() => {
-                            this.audioSource.playOneShot(this.Audioclips[1], 1);
-                            tween(this.BusArr[this.currentBusidx])
-                                .to(0.15, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'quadInOut' })
-                                .call(() => {
-                                    this.currentBusidx += 1;
-                                    if (this.currentBusidx == 3) {
-                                        this.currentBusidx = 0
-                                    }
-                                    tween(this.BusArr[this.currentBusidx])
-                                        .to(0.15, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'quadInOut' }).call(() => {
-                                            this.Bidx = 0;
-                                            this.CheckCollector();
-                                            this.enable = true;
-                                            Fbus.setPosition(10.021, 4.751, 1.474);
-                                            Fbus.children?.forEach((child) => {
-                                                child.destroy();
+                       this.playBeforeAnimation(Fbus, () => {
+                            this.scheduleOnce(() => {
+                                this.audioSource.playOneShot(this.Audioclips[1], 1);
+                                tween(this.BusArr[this.currentBusidx])
+                                    .to(0.15, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'quadInOut' })
+                                    .call(() => {
+                                        this.currentBusidx += 1;
+                                        if (this.currentBusidx == 3) this.currentBusidx = 0;
+
+                                        tween(this.BusArr[this.currentBusidx])
+                                            .to(0.15, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'quadInOut' })
+                                            .call(() => {
+                                                this.Bidx = 0;
+                                                this.CheckCollector();
+                                                this.enable = true;
+                                                Fbus.setPosition(10.021, 4.751, 1.474);
+                                                Fbus.children?.forEach((child) => child.destroy());
                                             })
+                                            .start();
 
-                                        }).start()
-                                    tween(this.BusArr[Lbus])
-                                        .to(0.15, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'quadInOut' }).start()
-
-                                }).start();
-                        }, 0.7)
+                                        tween(this.BusArr[Lbus])
+                                            .to(0.15, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'quadInOut' })
+                                            .start();
+                                    })
+                                    .start();
+                            }, 0.7);
+                        });
                     }
 
                     sIdx += 1;
@@ -253,6 +293,32 @@ export class GameManager extends Component {
 
         }
 
+
+    }
+
+    playBeforeAnimation(node: Node, onComplete: () => void) {
+        this.scheduleOnce(() => {
+            const children = node.children;
+            const total = children.length;
+
+            children.forEach((animNode, index) => {
+                const initPos = animNode.position.clone();
+
+                // Staggered delay using index
+                tween(animNode)
+                    .delay(index * 0.05)
+                    .to(0.3, { position: new Vec3(initPos.x, initPos.y + 0.4, initPos.z) }, { easing: 'quadIn' })
+                    .to(0.3, { position: initPos }, { easing: 'quadOut' })
+                    .call(() => {
+                        if (index === total - 8) {
+                            ;  // Call only after the last animation
+                        }
+                    })
+                    .start();
+            });
+            onComplete()
+        },0.4)
+        
 
     }
 
@@ -369,32 +435,34 @@ export class GameManager extends Component {
                             this.currentBusidx === 2 ? 1 :
                                 this.currentBusidx + 2;
 
-                        tween(Fbus)
-                            .to(0.15, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'quadInOut' })
-                            .call(() => {
-                                this.currentBusidx = (this.currentBusidx + 1) % 3;
-                                const newBus = this.BusArr[this.currentBusidx];
-
-                                tween(newBus)
-                                    .to(0.15, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'quadInOut' })
+                        this.playBeforeAnimation(Fbus, () => {
+                            this.scheduleOnce(() => {
+                                // this.audioSource.playOneShot(this.Audioclips[1], 1);
+                                tween(this.BusArr[this.currentBusidx])
+                                    .to(0.15, { position: new Vec3(-6.096, 4.751, -14.643) }, { easing: 'quadInOut' })
                                     .call(() => {
-                                        this.Bidx = 0;
-                                        this.CheckCollector(() => {
-                                            this.isAnimating = false;
-                                            this.collectoranim = false;
-                                            onComplete?.();
-                                        });
+                                        this.currentBusidx += 1;
+                                        if (this.currentBusidx == 3) this.currentBusidx = 0;
 
-                                        Fbus.setPosition(10.021, 4.751, 1.474);
-                                        Fbus.children?.forEach(child => child.destroy());
+                                        tween(this.BusArr[this.currentBusidx])
+                                            .to(0.15, { position: new Vec3(4.386, 4.751, -4.161) }, { easing: 'quadInOut' })
+                                            .call(() => {
+                                                this.Bidx = 0;
+                                                this.CheckCollector();
+                                                this.enable = true;
+                                                Fbus.setPosition(10.021, 4.751, 1.474);
+                                                Fbus.children?.forEach((child) => child.destroy());
+                                            })
+                                            .start();
+
+                                        tween(this.BusArr[Lbus])
+                                            .to(0.15, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'quadInOut' })
+                                            .start();
                                     })
                                     .start();
-
-                                tween(this.BusArr[Lbus])
-                                    .to(0.15, { position: new Vec3(7.08, 4.751, -1.467) }, { easing: 'quadInOut' })
-                                    .start();
-                            })
-                            .start();
+                                    }, 0.5);
+                            
+                        });
                     } else {
                         this.CheckCollector(() => {
                             this.isAnimating = false;
@@ -489,7 +557,7 @@ export class GameManager extends Component {
     }
 
     OnStartButtonClick() {
-        this.Collector.getComponent(AudioSource).stop();
+        this.Plane.getComponent(AudioSource).stop();
         this.audioSource.stop();
         if (sys.os === sys.OS.ANDROID) {
             window.open("https://play.google.com/store/apps/details?id=com.Machina.SortDash&hl=en_IN&pli=1", "SortDash");
