@@ -215,7 +215,7 @@ export class GameManager extends Component {
                         this.busArr.push(box.node)
                         this.Bidx += 1;
                         this.audioSource.playOneShot(this.Audioclips[4], 1);
-                    } else if (this.Cidx <= 14) {
+                    } else if (this.Cidx <= 19) {
                         this.colliderPosCrt(node, node.children.length);
                         box.isBus = false;
                         box.anim(this.Cidx, this.Collector);
